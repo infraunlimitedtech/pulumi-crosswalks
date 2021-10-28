@@ -1,0 +1,3 @@
+name: k8s-cluster
+runtime: go
+description: Initial configuration of k8s

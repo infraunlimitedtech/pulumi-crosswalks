@@ -1,0 +1,21 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: traefik-ingress
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/router.entrypoints: web, websecure
+
+    # remark the following line, HTTPS will return "404 page not found"
+    # enable the following line, HTTP will return "404 page not found"
+    traefik.ingress.kubernetes.io/router.tls: "true"
+
+spec:
+  rules:
+    - host: user.example.io
+      http:
+        paths:
+        - path: /
+          backend:
+            serviceName: k8s-hello-world
+            servicePort: http

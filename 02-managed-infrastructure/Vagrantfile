@@ -1,0 +1,77 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+#
+
+def configure_eth1(cfg, node)
+  node.vm.provision 'file', source: cfg, destination: '/home/rancher/eth1.config'
+  node.vm.provision 'shell',
+    upload_path: '/home/rancher/vagrant-shell',
+    inline: 'mv -v /home/rancher/eth1.config /var/lib/connman/eth1.config',
+    reboot: true
+end
+
+def configure_vb(node)
+  node.vm.provider 'virtualbox' do |vb|
+    vb.customize ['modifyvm', :id, '--nic2', 'hostonly']
+    vb.customize ['modifyvm', :id, '--hostonlyadapter2', 'vboxnet0']
+
+    vb.customize ['modifyvm', :id, '--natdnshostresolver1', 'off']
+    vb.customize ['modifyvm', :id, '--natdnsproxy1', 'on']
+
+    vb.customize ['modifyvm', :id, '--acpi', 'off']
+    vb.memory = '2048'
+    vb.cpus = 2
+  end
+end
+
+
+
+Vagrant.configure('2') do |config|
+  config.vm.box = 'spigell/k3os'
+  config.vm.guest = :linux
+
+  config.ssh.forward_agent = true
+  config.vm.network 'forwarded_port', guest: 22, host: 2222, disabled: true
+  config.vm.synced_folder '.', '/vagrant', disabled: true
+
+  
+  config.vm.define 'k3s-server01' do |server01|
+    server01.vm.provider 'virtualbox' do |vb|
+      vb.customize ['modifyvm', :id, '--macaddress2', 'E427FFFFEEEE']
+    end
+    configure_vb(server01)
+    configure_eth1('vagrant/connman-configs/k3s-server01.config', server01)
+  end
+
+  config.vm.define 'k3s-server02' do |server02|
+    server02.vm.provider 'virtualbox' do |vb|
+      vb.customize ['modifyvm', :id, '--macaddress2', 'E427FFFFEEE1']
+    end
+    configure_vb(server02)
+    configure_eth1('vagrant/connman-configs/k3s-server02.config', server02)
+  end
+
+  config.vm.define 'k3s-server03' do |server03|
+    server03.vm.provider 'virtualbox' do |vb|
+      vb.customize ['modifyvm', :id, '--macaddress2', 'E427FFFFEEE2']
+    end
+    configure_vb(server03)
+    configure_eth1('vagrant/connman-configs/k3s-server03.config', server03)
+  end
+
+  config.vm.define 'k3s-agent01' do |agent01|
+    agent01.vm.provider 'virtualbox' do |vb|
+      vb.customize ['modifyvm', :id, '--macaddress2', 'E427FFFFEEE3']
+    end
+    configure_vb(agent01)
+    configure_eth1('vagrant/connman-configs/k3s-agent01.config', agent01)
+  end
+
+  config.vm.define 'k3s-agent02' do |agent02|
+    agent02.vm.provider 'virtualbox' do |vb|
+      vb.customize ['modifyvm', :id, '--macaddress2', 'E427FFFFEEE4']
+    end
+    configure_vb(agent02)
+    configure_eth1('vagrant/connman-configs/k3s-agent02.config', agent02)
+  end
+end

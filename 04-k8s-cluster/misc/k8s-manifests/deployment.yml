@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k8s-hello-world
+  labels:
+    app: ruby
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ruby
+  template:
+    metadata:
+      name: k8s-hello-world
+      labels:
+        app: ruby
+    spec:
+      containers:
+        - name: k8s-hello-world
+          image: manabusakai/k8s-hello-world:0.0.2
+          ports:
+            - containerPort: 8080
+        - name: fluentd
+          image: fluent/fluentd:v0.12
+          ports:
+            - containerPort: 24224

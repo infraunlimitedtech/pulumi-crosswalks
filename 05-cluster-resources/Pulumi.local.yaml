@@ -1,0 +1,8 @@
+config:
+  cluster-resources:infra:
+    consul:
+      gossipSecret: gt/eU2SviB7SUvbOiqT6kcFclCkSwX0Uo13TfWewZQ0=
+    lb:
+      nginxIngress:
+        helm:
+          version: 0.10.0

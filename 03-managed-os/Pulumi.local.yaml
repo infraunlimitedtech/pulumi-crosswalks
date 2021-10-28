@@ -1,0 +1,73 @@
+config:
+  managed-os:main:
+    defaults:
+      agents:
+        k3os:
+          k3s_args:
+          - agent
+          - --kubelet-arg=node-status-update-frequency=20s
+      global:
+        boot_cmd:
+        - echo Greetings from K3OS cluster!
+        k3os:
+          labels:
+            k3os.io/upgrade: disabled
+          token:
+            secure: AAABAK45Ndr8ZrWSFRSYy2ZxUsdb5SsaTnPgMuIU1IDVmUMOj6o=
+        run_cmd:
+        - sudo sed -e '/^rancher/p' -e 's/^rancher/vagrant/' -i /etc/passwd
+      servers:
+        k3os:
+          k3s_args:
+          - server
+          - --disable=traefik
+          - --disable=servicelb
+          - --disable-cloud-controller
+          - --disable=metrics-server
+          - --kube-apiserver-arg=default-not-ready-toleration-seconds=60
+          - --kube-apiserver-arg=default-unreachable-toleration-seconds=60
+          - --kubelet-arg=node-status-update-frequency=20s
+          - --kube-controller-manager-arg=node-monitor-grace-period=2m
+    infra_stack: infraunlimited/managed-infrastructure/local
+    nodes:
+      agents:
+      - config:
+          k3os:
+            labels:
+              node.infraunlimited.tech/type: vagrant
+        id: k3s-agent01
+        public_ip: 192.168.99.140
+        wireguard:
+          privateaddr: 192.168.77.3
+          privatekey: 4BJUrT80rCNgurgstPwz8zIto/iyXrWkW2gN1JGAzEQ=
+          publickey: CbbdbGwrPuKmZJ6Isusg5y0UjfMwJeLeAdhRBXtnyDA=
+      - id: k3s-agent02
+        public_ip: 192.168.99.141
+        wireguard:
+          privateaddr: 192.168.77.4
+          privatekey: mAEqDsg+Qnonc8tUK8povXs7oDBbVD6Wg7Gk88M+f0o=
+          publickey: bVOtrGF5S8OKFUlysqZKdpz/7LEevPpFcnogexp7Y04=
+      servers:
+      - id: k3s-server01
+        leader: true
+        public_ip: 192.168.99.135
+        wireguard:
+          additional_peers:
+          - allowed_ips:
+            - 192.168.77.99/32
+            publickey: s5FZRUbMajKGH+KBGUQpbG9TrK4sWaafnVpRTJErOx0=
+          privateaddr: 192.168.77.1
+          privatekey: EJRPP7G2iJiyJsvJ6IvK10wP8piYrKAOmYwkc28iMXA=
+          publickey: tpmTgaqqJuUx6fs9EFWBRFa0MyqH+Z2bp1vUNzXE51I=
+      - id: k3s-server02
+        public_ip: 192.168.99.136
+        wireguard:
+          privateaddr: 192.168.77.2
+          privatekey: KNYgvlhpO0f5dk0EHSroB6yJ2Z7QuIGalWPEiQHw12g=
+          publickey: cQ0dxNsFyv1zK9gXOO/cFSphVP8BVkN+7MXbKsfcYFE=
+      - id: k3s-server03
+        public_ip: 192.168.99.137
+        wireguard:
+          privateaddr: 192.168.77.5
+          privatekey: OCMTzeachWyfE0shJIKhdyRGnsB4VpCV1FJllKWTY3Q=
+          publickey: rn4wJLOwXWVp5HO4U6NMNN4nSVDExpdOuRIHnjiZV1Q=
