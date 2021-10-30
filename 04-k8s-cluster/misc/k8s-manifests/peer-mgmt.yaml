@@ -1,0 +1,10 @@
+apiVersion: kilo.squat.ai/v1alpha1
+kind: Peer
+metadata:
+  name: test-mgmt
+  namespace: kube-system
+spec:
+  allowedIPs:
+  - 10.10.0.1/32 # Example IP address on the peer's interface.
+  publicKey: IwZFwq1RQYGmw9hfmR+zws1WdddL+HhA+mEamKIfiCg=
+  persistentKeepalive: 10
