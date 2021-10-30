@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/base64"
 	"fmt"
 	"github.com/imdario/mergo"
 	"github.com/pkg/errors"
@@ -31,13 +30,11 @@ type Node struct {
 	ID        string
 	Leader    bool
 	Wireguard Wireguard
-	PublicIP  string `json:"public_ip"`
 	Config    k3os.NodeConfig
 	kind      string
 }
 
 var (
-	wgFilePath        = "/etc/wireguard/kubewg0.conf"
 	additionalModules = []string{"wireguard"}
 	additionalK3sArgs = []string{"--flannel-iface=kubewg0"}
 	additionalRunCmd  = []string{"sudo wg-quick up kubewg0"}
@@ -52,24 +49,12 @@ func parseConfig(ctx *pulumi.Context) *pulumiConfig {
 
 }
 
-func buildNodeConfig(cluster *cluster, pulumiCfg *pulumiConfig, node Node) (*k3os.NodeConfig, error) {
-	wgPeers := buildWgPeers(append(cluster.followers, cluster.leader), node)
-	wgConfig, err := renderWgConfig(wgPeers, node)
-	if err != nil {
-		return nil, errors.Wrap(err, "rendering wireguard config")
-	}
-	wgFile := k3os.CloudInitFile{
-		Encoding: "b64",
-		Content:  base64.StdEncoding.EncodeToString([]byte(wgConfig)),
-		Path:     wgFilePath,
-	}
-
+func buildNodeConfig(pulumiCfg *pulumiConfig, node Node) (*k3os.NodeConfig, error) {
 	config, err := mergeVars(node, pulumiCfg.Defaults)
 	if err != nil {
 		return nil, errors.Wrap(err, "merge variables")
 	}
 
-	config.WriteFiles = append(config.WriteFiles, wgFile)
 	config.K3os.Modules = append(config.K3os.Modules, additionalModules...)
 	config.K3os.K3sArgs = append(config.K3os.K3sArgs, additionalK3sArgs...)
 	config.Runcmd = append(config.Runcmd, additionalRunCmd...)
@@ -87,7 +72,6 @@ func buildNodeConfig(cluster *cluster, pulumiCfg *pulumiConfig, node Node) (*k3o
 func mergeVars(node Node, defaults Defaults) (*k3os.NodeConfig, error) {
 	nodeConfig := &node.Config
 	if err := mergo.Merge(nodeConfig, defaults.Global, mergo.WithAppendSlice); err != nil {
-
 		return nil, err
 	}
 

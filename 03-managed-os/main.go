@@ -10,13 +10,12 @@ import (
 )
 
 const (
-	wgListenPort = 51820
-	serverStr    = "server"
-	agentStr     = "agent"
+	serverStr = "server"
+	agentStr  = "agent"
 )
 
 var (
-	errNoLeader    = errors.New("There is no leader. Please set it in config")
+	errNoLeader    = errors.New("There is no a leader. Please set it in config")
 	errAgentLeader = errors.New("Agent can't be a leader")
 	errManyLeaders = errors.New("There is more than one leader")
 )
@@ -45,7 +44,7 @@ func main() {
 			return err
 		}
 
-		config, err := buildNodeConfig(cluster, pulumiCfg, cluster.leader)
+		config, err := buildNodeConfig(pulumiCfg, cluster.leader)
 		if err != nil {
 			err = errors.Wrap(err, "Error creating a leader config")
 			ctx.Log.Error(err.Error(), nil)
@@ -64,9 +63,9 @@ func main() {
 				BootCmd:  pulumi.ToStringArray(config.Bootcmd),
 				WriteFiles: &k3os.CloudInitFilesArray{
 					&k3os.CloudInitFilesArgs{
-						Content:  pulumi.String(config.WriteFiles[0].Content),
-						Path:     pulumi.String(config.WriteFiles[0].Path),
-						Encoding: pulumi.String(config.WriteFiles[0].Encoding),
+						Content:  generateWgConfig(nodesInfo, cluster, cluster.leader),
+						Path:     pulumi.String("/etc/wireguard/kubewg0.conf"),
+						Encoding: pulumi.String("b64"),
 					},
 				},
 				K3OS: &k3os.K3OSArgs{
@@ -85,7 +84,7 @@ func main() {
 		)
 
 		for _, node := range cluster.followers {
-			config, err := buildNodeConfig(cluster, pulumiCfg, node)
+			config, err := buildNodeConfig(pulumiCfg, node)
 			if err != nil {
 				err = errors.Wrap(err, "Error creating a follower config")
 				ctx.Log.Error(err.Error(), nil)
@@ -104,9 +103,9 @@ func main() {
 					RunCmd:   pulumi.ToStringArray(config.Runcmd),
 					WriteFiles: &k3os.CloudInitFilesArray{
 						&k3os.CloudInitFilesArgs{
-							Content:  pulumi.String(config.WriteFiles[0].Content),
-							Path:     pulumi.String(config.WriteFiles[0].Path),
-							Encoding: pulumi.String(config.WriteFiles[0].Encoding),
+							Content:  generateWgConfig(nodesInfo, cluster, node),
+							Path:     pulumi.String("/etc/wireguard/kubewg0.conf"),
+							Encoding: pulumi.String("b64"),
 						},
 					},
 					K3OS: &k3os.K3OSArgs{
@@ -157,18 +156,12 @@ func newCluster(n Nodes, infraOutputs pulumi.AnyOutput) (*cluster, error) {
 }
 
 func validate(nodes []Node, infraOutputs pulumi.AnyOutput) error {
-
 	_ = infraOutputs.ApplyT(func(v interface{}) error {
 		for _, node := range nodes {
 			outputs := v.(map[string]interface{})
-			m, ok := outputs[node.ID].(map[string]interface{})
+			_, ok := outputs[node.ID].(map[string]interface{})
 			if !ok {
 				panic(fmt.Sprintf("No node `%s` in Infra Layer!", node.ID))
-			}
-			if node.PublicIP != m["ip"] {
-				panic(fmt.Sprintf("Please set correct PublicIP `%s` for node `%s` into Pulumi config! Current:`%s`",
-					m["ip"], node.ID, node.PublicIP),
-				)
 			}
 		}
 		return nil

@@ -36,13 +36,11 @@ config:
             labels:
               node.infraunlimited.tech/type: vagrant
         id: k3s-agent01
-        public_ip: 192.168.99.140
         wireguard:
           privateaddr: 192.168.77.3
           privatekey: 4BJUrT80rCNgurgstPwz8zIto/iyXrWkW2gN1JGAzEQ=
           publickey: CbbdbGwrPuKmZJ6Isusg5y0UjfMwJeLeAdhRBXtnyDA=
       - id: k3s-agent02
-        public_ip: 192.168.99.141
         wireguard:
           privateaddr: 192.168.77.4
           privatekey: mAEqDsg+Qnonc8tUK8povXs7oDBbVD6Wg7Gk88M+f0o=
@@ -50,7 +48,6 @@ config:
       servers:
       - id: k3s-server01
         leader: true
-        public_ip: 192.168.99.135
         wireguard:
           additional_peers:
           - allowed_ips:
@@ -60,13 +57,11 @@ config:
           privatekey: EJRPP7G2iJiyJsvJ6IvK10wP8piYrKAOmYwkc28iMXA=
           publickey: tpmTgaqqJuUx6fs9EFWBRFa0MyqH+Z2bp1vUNzXE51I=
       - id: k3s-server02
-        public_ip: 192.168.99.136
         wireguard:
           privateaddr: 192.168.77.2
           privatekey: KNYgvlhpO0f5dk0EHSroB6yJ2Z7QuIGalWPEiQHw12g=
           publickey: cQ0dxNsFyv1zK9gXOO/cFSphVP8BVkN+7MXbKsfcYFE=
       - id: k3s-server03
-        public_ip: 192.168.99.137
         wireguard:
           privateaddr: 192.168.77.5
           privatekey: OCMTzeachWyfE0shJIKhdyRGnsB4VpCV1FJllKWTY3Q=

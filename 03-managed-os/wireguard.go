@@ -1,8 +1,14 @@
 package main
 
 import (
+	"encoding/base64"
 	"fmt"
+	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 	"managed-os/utils/wireguard"
+)
+
+const (
+	wgListenPort = 51820
 )
 
 type Wireguard struct {
@@ -17,15 +23,27 @@ type AdditionalPeer struct {
 	PublicKey  string
 }
 
-func buildWgPeers(nodes []Node, self Node) []wireguard.Peer {
+func generateWgConfig(infraLayer pulumi.AnyOutput, cluster *cluster, self Node) pulumi.StringOutput {
+	return pulumi.Unsecret(infraLayer.ApplyT(func(v interface{}) string {
+		wgPeers := buildWgPeers(append(cluster.followers, cluster.leader), self, v)
+		wgConfig, err := renderWgConfig(wgPeers, self)
+		if err != nil {
+			panic(fmt.Sprintf("Error while render Wireguard config %e", err))
+		}
+		return base64.StdEncoding.EncodeToString([]byte(wgConfig))
+	})).(pulumi.StringOutput)
+}
+
+func buildWgPeers(nodes []Node, self Node, infraLayer interface{}) []wireguard.Peer {
 	peers := make([]wireguard.Peer, 0)
 	for _, node := range nodes {
+		m := infraLayer.(map[string]interface{})[node.ID].(map[string]interface{})
 		peer := wireguard.Peer{
 			ID:          node.ID,
 			PrivateKey:  node.Wireguard.PrivateKey,
 			PrivateAddr: node.Wireguard.PrivateAddr,
 			PublicKey:   node.Wireguard.PublicKey,
-			PublicAddr:  node.PublicIP,
+			PublicAddr:  m["ip"].(string),
 		}
 		peers = append(peers, peer)
 	}
