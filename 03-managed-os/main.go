@@ -2,8 +2,7 @@ package main
 
 import (
 	"fmt"
-
-	"github.com/pkg/errors"
+	"errors"
 
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 	"github.com/spigell/pulumi-k3os/sdk/go/k3os"
@@ -39,14 +38,14 @@ func main() {
 
 		cluster, err := newCluster(pulumiCfg.Nodes, nodesInfo)
 		if err != nil {
-			err = errors.Wrap(err, "Error init cluster")
+			err = fmt.Errorf("Error init cluster: %w", err)
 			ctx.Log.Error(err.Error(), nil)
 			return err
 		}
 
 		config, err := buildNodeConfig(pulumiCfg, cluster.leader)
 		if err != nil {
-			err = errors.Wrap(err, "Error creating a leader config")
+			err = fmt.Errorf("Error creating a leader config: %w", err)
 			ctx.Log.Error(err.Error(), nil)
 			return err
 		}
@@ -86,7 +85,7 @@ func main() {
 		for _, node := range cluster.followers {
 			config, err := buildNodeConfig(pulumiCfg, node)
 			if err != nil {
-				err = errors.Wrap(err, "Error creating a follower config")
+				err = fmt.Errorf("Error creating a follower config: %w", err)
 				ctx.Log.Error(err.Error(), nil)
 				return err
 			}
