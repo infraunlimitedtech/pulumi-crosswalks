@@ -1,0 +1,69 @@
+secretsprovider: hashivault://pulumi-infra-os-managed-prod
+encryptedkey: dmF1bHQ6djE6amxncmNWSmQwbkh1WEFFdGJJWDVXdXcwWVllNEd1L3FzUW92WmFHcTU1cDBIYmN3WitjSFlyUVJhSk00eVptckpSRnVPMjNxT0RjbWZKb1c=
+config:
+  managed-os:main:
+    defaults:
+      agents:
+        k3os:
+          k3s_args:
+          - agent
+          - --kubelet-arg=node-status-update-frequency=20s
+      global:
+        boot_cmd:
+        - sudo sh -c "echo GA_PATH=/dev/vport1p1 > /etc/conf.d/qemu-guest-agent"
+        k3os:
+          labels:
+            k3os.io/upgrade: disabled
+          token:
+            secure: v1:mckJJI9VTRdF+9pc:HltqIKGfAX9FIJ9MO9QcsO/COzLVat0PoJdeDZ141YE=
+      servers:
+        k3os:
+          k3s_args:
+          - server
+          - --disable=traefik
+          - --disable=servicelb
+          - --disable-cloud-controller
+          - --disable=metrics-server
+          - --kube-apiserver-arg=default-not-ready-toleration-seconds=60
+          - --kube-apiserver-arg=default-unreachable-toleration-seconds=60
+          - --kubelet-arg=node-status-update-frequency=20s
+          - --kube-controller-manager-arg=node-monitor-grace-period=2m
+    infra_stack: infraunlimited/managed-infrastructure/prod
+    nodes:
+      agents:
+      - id: k3s-agent01
+        wireguard:
+          privateaddr: 192.168.88.4
+          privatekey:
+            secure: v1:3FjPy3yF/arPxGs7:tPLCosH0Y4n5Lxx0ci62zcTl3yzFCW3ZOizE5lBPw6IuXzZDxRhpxaBJrtrSBInR952/EZhTRZte9r/l
+          publickey: 37NzAncqlQgyxdBnNBdasO3/zUzAQelxKMU7Md0MXEM=
+      - id: k3s-agent02
+        wireguard:
+          privateaddr: 192.168.88.5
+          privatekey:
+            secure: v1:EzWkMiRurOepDH/e:TS9wXzfbXrpes1o/KorXxKISs3tinDBqxnxy1mdgBip6XMSjvO2y3e+8Dz9o6uH+ujNEH7iiBVC8H4Wk
+          publickey: 7BV6HhME/FqnDs95WZvm1IJaYiZXfNxy9/BK1TJvAjw=
+      servers:
+      - id: k3s-server01
+        leader: true
+        wireguard:
+          additional_peers:
+          - allowed_ips:
+            - 192.168.88.99/32
+            publickey: s5FZRUbMajKGH+KBGUQpbG9TrK4sWaafnVpRTJErOx0=
+          privateaddr: 192.168.88.1
+          privatekey:
+            secure: v1:RHk3aaJ8VZxBXvlJ:AkkCve34bikSLOoTGWZtQ8c1nrlg6S2uAf6BPfw2DtJV/VBQUGs8O1iwk66BENsgE90KITH3JKTbed1U
+          publickey: OoPawfHoIyGKEJsALl/qOHtADY3B56XjEouBssfr5iE=
+      - id: k3s-server02
+        wireguard:
+          privateaddr: 192.168.88.2
+          privatekey:
+            secure: v1:BemJRBCPRh3k8O8D:R2zi9QFzyueI+ZlXW642rj9lksNd87TsDFwEX2QJtFS08dxaRF4SduUyx9oWXuS/FtFrFpX5EciGqGvC
+          publickey: YsmBMM4tDl7Xf2alEyq3WSvwWCDMncaNdXiNnBFogjQ=
+      - id: k3s-server03
+        wireguard:
+          privateaddr: 192.168.88.3
+          privatekey:
+            secure: v1:KxvNms3d16przTDl:Z7kU/4aPWlSfiYhqwEWdyO0gD+gDsWE6us22kSlpOa9nqxMxAyU+yuLYrEvbdhuDk++KJcv7AlsbVbQk
+          publickey: zUd5MsZeduPmEAFWvml7EXAFqloqYlqk1XSNoj3PZDM=
