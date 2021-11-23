@@ -14,6 +14,9 @@ config:
         k3os:
           labels:
             k3os.io/upgrade: disabled
+          ntp_servers:
+          - 0.us.pool.ntp.org
+          - 1.us.pool.ntp.org
           token:
             secure: v1:mckJJI9VTRdF+9pc:HltqIKGfAX9FIJ9MO9QcsO/COzLVat0PoJdeDZ141YE=
       servers:

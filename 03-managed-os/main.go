@@ -71,6 +71,7 @@ func main() {
 					Token:   pulumi.String(config.K3os.Token),
 					K3sArgs: pulumi.ToStringArray(config.K3os.K3sArgs),
 					Labels:  pulumi.ToStringMap(config.K3os.Labels),
+					NtpServers: pulumi.ToStringArray(config.K3os.NtpServers),
 				},
 			},
 		})
@@ -112,7 +113,9 @@ func main() {
 						ServerUrl: pulumi.String(cluster.serverURL),
 						K3sArgs:   pulumi.ToStringArray(config.K3os.K3sArgs),
 						Labels:    pulumi.ToStringMap(config.K3os.Labels),
+						NtpServers: pulumi.ToStringArray(config.K3os.NtpServers),
 					},
+
 				},
 			}, pulumi.DependsOn([]pulumi.Resource{leader}))
 			if err != nil {

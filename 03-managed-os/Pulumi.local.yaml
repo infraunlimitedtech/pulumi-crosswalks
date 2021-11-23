@@ -14,6 +14,9 @@ config:
             k3os.io/upgrade: disabled
           token:
             secure: AAABAK45Ndr8ZrWSFRSYy2ZxUsdb5SsaTnPgMuIU1IDVmUMOj6o=
+          ntp_servers:
+            - 0.us.pool.ntp.org
+            - 1.us.pool.ntp.org
         run_cmd:
         - sudo sed -e '/^rancher/p' -e 's/^rancher/vagrant/' -i /etc/passwd
       servers:
