@@ -2,6 +2,7 @@ package libvirt
 
 import (
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
+	"managed-infrastructure/utils"
 )
 
 type Config []HypervisorConfig
@@ -21,7 +22,7 @@ type Infra struct {
 	nodes map[string]map[string]interface{}
 }
 
-func Init(ctx *pulumi.Context, user string, key pulumi.Output, cfg *Config) (*Infra, error) {
+func Init(ctx *pulumi.Context, sshCreds pulumi.Output, cfg *Config) (*Infra, error) {
 	nodes := make(map[string]map[string]interface{})
 	for _, hypevisor := range *cfg {
 		computedInfo, err := manageLibvirtHost(ctx, hypevisor)
@@ -31,8 +32,8 @@ func Init(ctx *pulumi.Context, user string, key pulumi.Output, cfg *Config) (*In
 		}
 
 		for k, v := range computedInfo {
-			v["key"] = key
-			v["user"] = user
+			v["key"] = utils.ExtractFromExportedMap(sshCreds, "privatekey")
+			v["user"] = utils.ExtractFromExportedMap(sshCreds, "user")
 			nodes[k] = v
 		}
 	}

@@ -10,13 +10,8 @@ import (
 )
 
 type mainConfig struct {
-	Provider string
-	SSH      SSHConfig
-}
-
-type SSHConfig struct {
-	User       string
-	PrivateKey string `json:"private_key"`
+	Provider      string
+	IdentityStack string `json:"identitystack"`
 }
 
 func main() {
@@ -25,16 +20,23 @@ func main() {
 		cfg := config.New(ctx, "")
 		cfg.RequireObject("main", &mainCfg)
 
+		identityStack, err := pulumi.NewStackReference(ctx, mainCfg.IdentityStack, nil)
+		if err != nil {
+			return err
+		}
+
+		sshCreds := identityStack.GetOutput(pulumi.String("identity:ssh:credentials"))
+
 		var i infra.Infra
 		switch mainCfg.Provider {
 		case "vagrant":
 			ctx.Log.Warn("Vagrant stack is not implemented yet. Controlled via Vagrant", nil)
-			i = vagrant.Init(mainCfg.SSH.User, pulumi.ToSecret(mainCfg.SSH.PrivateKey))
+			i = vagrant.Init(sshCreds)
 		case "libvirt":
 			var libvirtCfg libvirt.Config
 			var err error
 			cfg.RequireSecretObject("libvirt", &libvirtCfg)
-			i, err = libvirt.Init(ctx, mainCfg.SSH.User, pulumi.ToSecret(mainCfg.SSH.PrivateKey), &libvirtCfg)
+			i, err = libvirt.Init(ctx, sshCreds, &libvirtCfg)
 			if err != nil {
 				return err
 			}

@@ -2,6 +2,7 @@ package vagrant
 
 import (
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
+	"managed-infrastructure/utils"
 )
 
 type Infra struct {
@@ -32,13 +33,13 @@ var vagrantNodes = []map[string]string{
 	},
 }
 
-func Init(user string, key pulumi.Output) *Infra {
+func Init(sshCreds pulumi.Output) *Infra {
 	nodes := make(map[string]map[string]interface{})
 
 	for _, node := range vagrantNodes {
 		nodes[node["id"]] = map[string]interface{}{
-			"user": user,
-			"key":  key,
+			"key":  utils.ExtractFromExportedMap(sshCreds, "privatekey"),
+			"user": utils.ExtractFromExportedMap(sshCreds, "user"),
 			"ip":   node["ip"],
 		}
 	}
