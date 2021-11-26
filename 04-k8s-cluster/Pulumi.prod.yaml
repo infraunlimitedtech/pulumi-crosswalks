@@ -1,0 +1,28 @@
+secretsprovider: hashivault://pulumi-infra-k8s-cluster-prod
+encryptedkey: dmF1bHQ6djE6VVFFYWFiMDdoM0VBRmZlYmpmdnM5UThtVmN5Tjhtdy96Ui9nVkJKS3VIWE0xcXRlT1ZKRVZwSWNHOEN4b1NGNlMxRW50S0c3RTB6emo1blU=
+config:
+  k8s-cluster:addons:
+    kilo:
+      crds:
+        path: crds/sources/squat/kilo
+      peers:
+      - allowedIPs:
+        - 10.5.0.1/32
+        name: spigell
+        publicKey: bHk2u/HZQg5gOzmFXkk7QTRngPQfCtFEUnGFDSMQrC8=
+      privateKey:
+        secure: v1:oDCSfXD7eeg5i6jx:+B7FeeFW2dcxymHaTtBxJ9qJkAN/Txg3iCbkJOQDoPHc3Y1nbO04DFIA5vgbDrwJXRFYhWIyDJFz0rvr
+      version: 0.3.0
+    metallb:
+      defaultNetworkPool: 192.168.0.240/29
+      helm:
+        version: v1.12.0
+      kubeapiIP: 192.168.0.249
+    nginxIngress:
+      helm:
+        version: 0.10.0
+  k8s-cluster:main:
+    key: value
+  k8s-cluster:spec:
+    externalIP: 192.168.0.254
+    internalDomainZone: production.intra.infraunlimited.tech

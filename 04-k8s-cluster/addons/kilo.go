@@ -365,7 +365,7 @@ cp secrets/* /var/lib/kilo/`),
 			Namespace: pulumi.String(a.Namespace),
 		},
 		Spec: &corev1.ServiceSpecArgs{
-			ExternalTrafficPolicy: pulumi.String("Cluster"),
+			ExternalTrafficPolicy: pulumi.String("Local"),
 			LoadBalancerIP:        pulumi.String(a.MetalLb.ExternalIP),
 			Type:                  pulumi.String("LoadBalancer"),
 			Selector: pulumi.StringMap{

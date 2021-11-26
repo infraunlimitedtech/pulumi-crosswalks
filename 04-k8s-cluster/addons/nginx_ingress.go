@@ -23,7 +23,7 @@ func (a *Addons) RunNginxIngress() error {
 		Values: pulumi.Map{
 			"controller": pulumi.Map{
 				"name":         pulumi.String(addonName),
-				"replicaCount": pulumi.Int(1),
+				"replicaCount": pulumi.Int(2),
 				"nodeSelector": pulumi.Map{
 					"node-role.kubernetes.io/master": pulumi.String("true"),
 				},
@@ -34,6 +34,11 @@ func (a *Addons) RunNginxIngress() error {
 				},
 				"globalConfiguration": pulumi.Map{
 					"create": pulumi.Bool(false),
+				},
+				"config": pulumi.Map{
+					"entries": pulumi.Map{
+						"stream-snippets": pulumi.String("map_hash_bucket_size 512;\n map_hash_max_size 2048;"),
+					},
 				},
 			},
 		},
@@ -70,7 +75,6 @@ func (a *Addons) RunNginxIngress() error {
 		},
 	})
 
-
 	if err != nil {
 		return err
 	}
@@ -88,7 +92,8 @@ func (a *Addons) RunNginxIngress() error {
 				"app": pulumi.String(a.NginxIngress.Name),
 			},
 			Type:           pulumi.String("LoadBalancer"),
-			LoadBalancerIP: pulumi.String("192.168.74.1"),
+			ExternalTrafficPolicy: pulumi.String("Local"),
+			LoadBalancerIP: pulumi.String(a.MetalLb.KubeapiIP),
 			Ports: corev1.ServicePortArray{
 				&corev1.ServicePortArgs{
 					Protocol: pulumi.String("TCP"),
