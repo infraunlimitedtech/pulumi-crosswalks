@@ -5,12 +5,12 @@ config:
   - machines:
     - id: k3s-server01
     - id: k3s-server02
-    - id: k3s-agent01
+    - id: k3s-server03
     name: kvm1
     networkcidr: 192.168.0.208/28
     uri: qemu+ssh://root@192.168.0.72:22/system?no_verify=true
   - machines:
-    - id: k3s-server03
+    - id: k3s-agent01
     - id: k3s-agent02
     name: kvm2
     networkcidr: 192.168.0.224/28
