@@ -13,6 +13,11 @@ func (a *Addons) RunMetricServer() error {
 		FetchArgs: helmv3.FetchArgs{
 			Repo: pulumi.String("https://charts.bitnami.com/bitnami"),
 		},
+		Values: pulumi.Map{
+			"apiService": pulumi.Map{
+				"create": pulumi.Bool(true),
+			},
+		},
 	})
 	if err != nil {
 		return err
