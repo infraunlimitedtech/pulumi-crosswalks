@@ -19,6 +19,10 @@ config:
             - 1.us.pool.ntp.org
         run_cmd:
         - sudo sed -e '/^rancher/p' -e 's/^rancher/vagrant/' -i /etc/passwd
+        - sudo sed -i 's/NetworkInterfaceBlacklist=veth/NetworkInterfaceBlacklist=veth,eth1/' /etc/connman/main.conf
+        - sudo rc-service connman restart
+        - sleep 5
+        - sudo ip l set up eth1 && . /var/lib/rancher/k3os/infra-env && sudo ip a add ${PrivateIP}/24 dev eth1
       servers:
         k3os:
           k3s_args:
