@@ -1,9 +1,9 @@
 package addons
 
 import (
-	"k8s-cluster/spec"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi/config"
+	"k8s-cluster/spec"
 )
 
 type Addons struct {
@@ -16,9 +16,20 @@ type Addons struct {
 
 type MetalLb struct {
 	Helm               *HelmParams
+	Pools              *MetalLbPools
 	DefaultNetworkPool string
 	ExternalIP         string
 	KubeapiIP          string
+}
+
+type MetalLbPools struct {
+	Default MetalLbPool
+	Kilo    MetalLbPool
+	Kubeapi MetalLbPool
+}
+
+type MetalLbPool struct {
+	Network string
 }
 
 type NginxIngress struct {
@@ -55,10 +66,6 @@ func Init(ctx *pulumi.Context, s *spec.ClusterSpec) (*Addons, error) {
 	var pulumiAddonsCfg Addons
 	cfg := config.New(ctx, "")
 	cfg.RequireSecretObject("addons", &pulumiAddonsCfg)
-
-	if s.ExternalIP != "" {
-		pulumiAddonsCfg.MetalLb.ExternalIP = s.ExternalIP
-	}
 
 	a := &Addons{
 		Namespace: namespace,

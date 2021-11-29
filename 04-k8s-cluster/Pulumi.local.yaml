@@ -12,15 +12,19 @@ config:
         secure: AAABANecFG5q5Hk2Sg3tlvzIsnyuZLqbhwpPYpd4ipgpB72awOrWYYr/WJ3lUCTT1wyTBKGToGYcseRIFtp+BU3UEFHjto5o41jdUA==
       version: 0.3.0
     metallb:
-      defaultNetworkPool: 192.168.75.0/24
+      pools:
+        default:
+          network: 192.168.99.240/29
+        kubeapi:
+          network: 192.168.99.249/32
+        kilo:
+          network: 192.168.99.189/32
       helm:
         version: v1.12.0
-      kubeapiIP: 192.168.74.1
     nginxIngress:
       helm:
         version: 0.10.0
   k8s-cluster:main:
     key: value
   k8s-cluster:spec:
-    externalIP: 192.168.99.189
     internalDomainZone: local.intra.infraunlimited.tech

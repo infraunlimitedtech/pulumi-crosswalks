@@ -17,7 +17,7 @@ func main() {
 		if err := rbac.Init(ctx); err != nil {
 			return err
 		}
-				
+
 		kubeClusterAddons, err := addons.Init(ctx, kubeClusterSpec)
 		if err != nil {
 			return err

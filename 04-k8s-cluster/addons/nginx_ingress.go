@@ -86,14 +86,16 @@ func (a *Addons) RunNginxIngress() error {
 		Metadata: &metav1.ObjectMetaArgs{
 			Name:      pulumi.String("kube-api"),
 			Namespace: pulumi.String(a.Namespace),
+			Annotations: pulumi.StringMap{
+				"metallb.universe.tf/address-pool": pulumi.String("kubeapi"),
+			},
 		},
 		Spec: &corev1.ServiceSpecArgs{
 			Selector: pulumi.StringMap{
 				"app": pulumi.String(a.NginxIngress.Name),
 			},
-			Type:           pulumi.String("LoadBalancer"),
+			Type:                  pulumi.String("LoadBalancer"),
 			ExternalTrafficPolicy: pulumi.String("Local"),
-			LoadBalancerIP: pulumi.String(a.MetalLb.KubeapiIP),
 			Ports: corev1.ServicePortArray{
 				&corev1.ServicePortArgs{
 					Protocol: pulumi.String("TCP"),

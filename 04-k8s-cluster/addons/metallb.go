@@ -7,7 +7,6 @@ import (
 
 func (a *Addons) RunMetalLb() error {
 	addonName := "metallb-addon"
-	externalPoolName := "external"
 
 	_, err := helmv3.NewChart(a.ctx, "metallbAddon", helmv3.ChartArgs{
 		Chart:     pulumi.String("metallb"),
@@ -28,7 +27,7 @@ func (a *Addons) RunMetalLb() error {
 						"name":     pulumi.String("default"),
 						"protocol": pulumi.String("layer2"),
 						"addresses": pulumi.Array{
-							pulumi.String(a.MetalLb.DefaultNetworkPool),
+							pulumi.String(a.MetalLb.Pools.Default.Network),
 						},
 						"avoid-buggy-ips": pulumi.Bool(true),
 					},
@@ -36,15 +35,15 @@ func (a *Addons) RunMetalLb() error {
 						"name":     pulumi.String("kubeapi"),
 						"protocol": pulumi.String("layer2"),
 						"addresses": pulumi.Array{
-							pulumi.String(a.MetalLb.KubeapiIP + "/32"),
+							pulumi.String(a.MetalLb.Pools.Kubeapi.Network),
 						},
 						"auto-assign": pulumi.Bool(false),
 					},
 					pulumi.Map{
-						"name":     pulumi.String(externalPoolName),
+						"name":     pulumi.String("kilo"),
 						"protocol": pulumi.String("layer2"),
 						"addresses": pulumi.Array{
-							pulumi.String(a.MetalLb.ExternalIP + "/32"),
+							pulumi.String(a.MetalLb.Pools.Kilo.Network),
 						},
 						"auto-assign": pulumi.Bool(false),
 					},
