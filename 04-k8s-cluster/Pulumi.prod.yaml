@@ -26,7 +26,5 @@ config:
     nginxIngress:
       helm:
         version: 0.10.0
-  k8s-cluster:main:
-    key: value
   k8s-cluster:spec:
     internalDomainZone: production.intra.infraunlimited.tech
