@@ -25,7 +25,7 @@ func main() {
 			return err
 		}
 
-		sshCreds := identityStack.GetOutput(pulumi.String("identity:ssh:credentials"))
+		sshCreds := identityStack.GetOutput(pulumi.String("identity:ssh:server_access:credentials"))
 
 		var i infra.Infra
 		switch mainCfg.Provider {
