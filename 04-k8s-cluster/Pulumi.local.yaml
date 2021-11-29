@@ -20,7 +20,7 @@ config:
         kilo:
           network: 192.168.99.189/32
       helm:
-        version: v1.12.0
+        version: 0.11.0
     nginxIngress:
       helm:
         version: 0.10.0

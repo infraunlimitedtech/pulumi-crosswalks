@@ -11,6 +11,7 @@ func (a *Addons) RunMetalLb() error {
 	_, err := helmv3.NewChart(a.ctx, "metallbAddon", helmv3.ChartArgs{
 		Chart:     pulumi.String("metallb"),
 		Namespace: pulumi.String(a.Namespace),
+		Version:   pulumi.String(a.MetalLb.Helm.Version),
 		FetchArgs: helmv3.FetchArgs{
 			Repo: pulumi.String("https://metallb.github.io/metallb"),
 		},
