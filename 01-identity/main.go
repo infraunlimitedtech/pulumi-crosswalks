@@ -1,41 +1,58 @@
 package main
 
 import (
-	"github.com/pulumi/pulumi-github/sdk/v4/go/github"
+	"encoding/base64"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi/config"
-	"os"
+	"identity/github"
 )
 
 type SSHConfig struct {
-	Credentials CredetialsConfig
+	ServerAccess ServerAccessConfig `json:"server_access"`
+}
+type ServerAccessConfig struct {
+	UploadToGithub bool `json:"upload_to_github"`
+	Credentials    CredetialsConfig
 }
 
 type CredetialsConfig struct {
 	User       string
 	PrivateKey string
+	PublicKey  string
+}
+
+type GithubConfig struct {
+	Managed bool
 }
 
 func main() {
 	pulumi.Run(func(ctx *pulumi.Context) error {
-		serverKey, _ := os.ReadFile("ssh/keys/server.pub")
-		_, err := github.NewUserSshKey(ctx, "serverKey", &github.UserSshKeyArgs{
-			Title: pulumi.String("server-key"),
-			Key:   pulumi.String(serverKey),
-		})
-		if err != nil {
-			return err
-		}
+		cfg := config.New(ctx, "")
 
 		var sshCfg SSHConfig
-		cfg := config.New(ctx, "")
 		cfg.RequireObject("ssh", &sshCfg)
 
-		creds := make(map[string]interface{})
-		creds["user"] = sshCfg.Credentials.User
-		creds["privatekey"] = pulumi.ToSecret(sshCfg.Credentials.PrivateKey)
+		var githubCfg GithubConfig
+		cfg.RequireObject("github", &githubCfg)
 
-		ctx.Export("identity:ssh:credentials", pulumi.ToMap(creds))
+		if githubCfg.Managed {
+			_ = github.ManageOrganization(ctx)
+		}
+
+		if sshCfg.ServerAccess.UploadToGithub {
+			decoded, err := base64.StdEncoding.DecodeString(sshCfg.ServerAccess.Credentials.PublicKey)
+			if err != nil {
+				return err
+			}
+			_ = github.SetServerPublicKey(ctx, string(decoded))
+		}
+
+		creds := make(map[string]interface{})
+		creds["user"] = sshCfg.ServerAccess.Credentials.User
+		creds["privatekey"] = pulumi.ToSecret(sshCfg.ServerAccess.Credentials.PrivateKey)
+
+		ctx.Export("identity:ssh:server_access:credentials", pulumi.ToMap(creds))
+
 		return nil
 	})
 }
