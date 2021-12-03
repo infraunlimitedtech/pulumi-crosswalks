@@ -27,6 +27,10 @@ config:
         k3os:
           k3s_args:
           - server
+          - --cluster-cidr=10.40.0.0/16
+          - --service-cidr=10.41.0.0/16
+          - --cluster-domain=local.intra.infraunlimited.tech
+          - --cluster-dns=10.41.0.10
           - --disable=traefik
           - --disable=servicelb
           - --disable-cloud-controller

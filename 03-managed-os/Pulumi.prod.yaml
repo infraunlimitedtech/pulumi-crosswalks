@@ -23,6 +23,7 @@ config:
         k3os:
           k3s_args:
           - server
+          - --cluster-domain=production.intra.infraunlimited.tech
           - --disable=traefik
           - --disable=servicelb
           - --disable-cloud-controller
