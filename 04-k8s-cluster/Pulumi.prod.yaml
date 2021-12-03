@@ -11,7 +11,7 @@ config:
       - allowedIPs:
         - 10.5.0.1/32
         name: spigell
-        publicKey: bHk2u/HZQg5gOzmFXkk7QTRngPQfCtFEUnGFDSMQrC8=
+        publicKey: cCTiNq0TKpf0M9xPyMEfhy3azsKkWcCuX1Fo+ZrIEw0=
       privateKey:
         secure: v1:oDCSfXD7eeg5i6jx:+B7FeeFW2dcxymHaTtBxJ9qJkAN/Txg3iCbkJOQDoPHc3Y1nbO04DFIA5vgbDrwJXRFYhWIyDJFz0rvr
       version: 0.3.0

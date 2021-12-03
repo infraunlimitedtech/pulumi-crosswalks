@@ -54,7 +54,7 @@ config:
           additional_peers:
           - allowed_ips:
             - 192.168.88.99/32
-            publickey: s5FZRUbMajKGH+KBGUQpbG9TrK4sWaafnVpRTJErOx0=
+            publickey: awbptzNO4VQoJbkbcDsPVcu9+YyktXNMmrI8rjzOlBE=
           privateaddr: 192.168.88.1
           privatekey:
             secure: v1:RHk3aaJ8VZxBXvlJ:AkkCve34bikSLOoTGWZtQ8c1nrlg6S2uAf6BPfw2DtJV/VBQUGs8O1iwk66BENsgE90KITH3JKTbed1U
