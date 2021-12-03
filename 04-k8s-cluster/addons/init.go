@@ -24,7 +24,6 @@ type MetalLb struct {
 
 type MetalLbPools struct {
 	Default MetalLbPool
-	Kilo    MetalLbPool
 	Kubeapi MetalLbPool
 }
 
@@ -33,9 +32,14 @@ type MetalLbPool struct {
 }
 
 type NginxIngress struct {
-	Name   string
+	Name string
 	Domain string
+	KubeAPI NginxKubeAPI
 	Helm   *HelmParams
+}
+
+type NginxKubeAPI struct {
+	ClusterIP string
 }
 
 type Kilo struct {
@@ -43,6 +47,7 @@ type Kilo struct {
 	Crds       *CRDS
 	Version    string
 	Peers      []KiloPeer
+	ExternalIPs []string
 }
 
 type KiloPeer struct {
@@ -74,6 +79,7 @@ func Init(ctx *pulumi.Context, s *spec.ClusterSpec) (*Addons, error) {
 			Name:   "nginx-ingress-addon",
 			Domain: s.InternalDomainZone,
 			Helm:   pulumiAddonsCfg.NginxIngress.Helm,
+			KubeAPI: pulumiAddonsCfg.NginxIngress.KubeAPI,
 		},
 		MetalLb: pulumiAddonsCfg.MetalLb,
 		Kilo:    pulumiAddonsCfg.Kilo,

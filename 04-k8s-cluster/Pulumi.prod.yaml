@@ -5,6 +5,8 @@ config:
     kilo:
       crds:
         path: crds/sources/squat/kilo
+      externalIPs:
+      - 192.168.0.213
       peers:
       - allowedIPs:
         - 10.5.0.1/32
@@ -18,13 +20,13 @@ config:
         version: 0.11.0
       pools:
         default:
-          network: 192.168.0.240/29
-        kilo:
-          network: 192.168.0.254/32
+          network: 192.168.85.240/29
         kubeapi:
-          network: 192.168.0.249/32
+          network: 192.168.85.249/32
     nginxIngress:
       helm:
         version: 0.10.0
+      kubeapi:
+        clusterIp: 10.43.1.1
   k8s-cluster:spec:
     internalDomainZone: production.intra.infraunlimited.tech

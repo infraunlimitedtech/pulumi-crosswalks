@@ -27,10 +27,6 @@ func main() {
 			return err
 		}
 
-		if err := kubeClusterAddons.RunMetalLb(); err != nil {
-			return err
-		}
-
 		if err := kubeClusterAddons.RunNginxIngress(); err != nil {
 			return err
 		}

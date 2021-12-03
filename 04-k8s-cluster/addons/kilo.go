@@ -363,13 +363,9 @@ cp secrets/* /var/lib/kilo/`),
 		Metadata: &metav1.ObjectMetaArgs{
 			Name:      pulumi.String("kilo-vpn"),
 			Namespace: pulumi.String(a.Namespace),
-			Annotations: pulumi.StringMap{
-				"metallb.universe.tf/address-pool": pulumi.String("kilo"),
-			},
 		},
 		Spec: &corev1.ServiceSpecArgs{
-			ExternalTrafficPolicy: pulumi.String("Local"),
-			Type:                  pulumi.String("LoadBalancer"),
+			Type:                  pulumi.String("ClusterIP"),
 			Selector: pulumi.StringMap{
 				"app.kubernetes.io/name":    pulumi.String("kilo"),
 				"app.kubernetes.io/part-of": pulumi.String("kilo"),
@@ -381,6 +377,7 @@ cp secrets/* /var/lib/kilo/`),
 					Port:     pulumi.Int(vpnPort),
 				},
 			},
+			ExternalIPs: pulumi.ToStringArray(a.Kilo.ExternalIPs),
 		},
 	})
 	if err != nil {

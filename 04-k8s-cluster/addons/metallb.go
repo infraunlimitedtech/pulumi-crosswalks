@@ -40,14 +40,6 @@ func (a *Addons) RunMetalLb() error {
 						},
 						"auto-assign": pulumi.Bool(false),
 					},
-					pulumi.Map{
-						"name":     pulumi.String("kilo"),
-						"protocol": pulumi.String("layer2"),
-						"addresses": pulumi.Array{
-							pulumi.String(a.MetalLb.Pools.Kilo.Network),
-						},
-						"auto-assign": pulumi.Bool(false),
-					},
 				},
 			},
 		},
