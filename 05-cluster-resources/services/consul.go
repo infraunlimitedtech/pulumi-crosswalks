@@ -82,8 +82,12 @@ func (infra *Infra) RunConsulStack() error {
 			"syncCatalog": pulumi.Map{
 				"enabled":               pulumi.Bool(true),
 				"addK8SNamespaceSuffix": pulumi.Bool(false),
-				"syncClusterIPServices": pulumi.Bool(false),
-				"toK8S":                 pulumi.Bool(false),
+				"syncClusterIPServices": pulumi.Bool(true),
+				"default":               pulumi.Bool(false),
+				"k8sDenyNamespaces": pulumi.StringArray{
+					pulumi.String("none"),
+				},
+				"toK8S": pulumi.Bool(false),
 				"resources": pulumi.Map{
 					"requests": pulumi.Map{
 						"memory": pulumi.String("20Mi"),
