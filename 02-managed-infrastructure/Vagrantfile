@@ -74,4 +74,12 @@ Vagrant.configure('2') do |config|
     configure_vb(agent02)
     configure_eth1(agent02, '192.168.99.141')
   end
+
+  config.vm.define 'k3s-agent03' do |agent03|
+    agent03.vm.provider 'virtualbox' do |vb|
+      vb.customize ['modifyvm', :id, '--macaddress2', 'E427FFFFEEE5']
+    end
+    configure_vb(agent03)
+    configure_eth1(agent03, '192.168.99.142')
+  end
 end

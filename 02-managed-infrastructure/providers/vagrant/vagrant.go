@@ -31,6 +31,10 @@ var vagrantNodes = []map[string]string{
 		"id": "k3s-agent02",
 		"ip": "192.168.99.141",
 	},
+	{
+		"id": "k3s-agent03",
+		"ip": "192.168.99.142",
+	},
 }
 
 func Init(sshCreds pulumi.Output) *Infra {
