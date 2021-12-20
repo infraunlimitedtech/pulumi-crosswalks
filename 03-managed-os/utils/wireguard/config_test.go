@@ -2,8 +2,9 @@ package wireguard
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 const ListenPort = 51820

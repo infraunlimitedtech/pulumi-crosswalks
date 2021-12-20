@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/imdario/mergo"
 	"github.com/pkg/errors"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
@@ -46,7 +47,6 @@ func parseConfig(ctx *pulumi.Context) *pulumiConfig {
 	cfg.RequireSecretObject("main", &pulumiCfg)
 
 	return &pulumiCfg
-
 }
 
 func buildNodeConfig(pulumiCfg *pulumiConfig, node Node) (*k3os.NodeConfig, error) {
@@ -90,5 +90,4 @@ func mergeVars(node Node, defaults Defaults) (*k3os.NodeConfig, error) {
 		}
 	}
 	return nodeConfig, nil
-
 }

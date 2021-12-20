@@ -14,9 +14,9 @@ const (
 )
 
 var (
-	errNoLeader    = errors.New("There is no a leader. Please set it in config")
-	errAgentLeader = errors.New("Agent can't be a leader")
-	errManyLeaders = errors.New("There is more than one leader")
+	errNoLeader    = errors.New("there is no a leader. Please set it in config")
+	errAgentLeader = errors.New("tgent can't be a leader")
+	errManyLeaders = errors.New("there is more than one leader")
 )
 
 type cluster struct {
@@ -38,14 +38,14 @@ func main() {
 
 		cluster, err := newCluster(pulumiCfg.Nodes, nodesInfo)
 		if err != nil {
-			err = fmt.Errorf("Error init cluster: %w", err)
+			err = fmt.Errorf("error init cluster: %w", err)
 			ctx.Log.Error(err.Error(), nil)
 			return err
 		}
 
 		config, err := buildNodeConfig(pulumiCfg, cluster.leader)
 		if err != nil {
-			err = fmt.Errorf("Error creating a leader config: %w", err)
+			err = fmt.Errorf("error creating a leader config: %w", err)
 			ctx.Log.Error(err.Error(), nil)
 			return err
 		}
@@ -87,7 +87,7 @@ func main() {
 		for _, node := range cluster.followers {
 			config, err := buildNodeConfig(pulumiCfg, node)
 			if err != nil {
-				err = fmt.Errorf("Error creating a follower config: %w", err)
+				err = fmt.Errorf("error creating a follower config: %w", err)
 				ctx.Log.Error(err.Error(), nil)
 				return err
 			}
@@ -155,7 +155,6 @@ func newCluster(n Nodes, infraOutputs pulumi.AnyOutput) (*cluster, error) {
 		serverURL: serverURL,
 		followers: followers,
 	}, nil
-
 }
 
 func validate(nodes []Node, infraOutputs pulumi.AnyOutput) error {

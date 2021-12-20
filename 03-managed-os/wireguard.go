@@ -3,8 +3,9 @@ package main
 import (
 	"encoding/base64"
 	"fmt"
-	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 	"managed-os/utils/wireguard"
+
+	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
 
 const (
