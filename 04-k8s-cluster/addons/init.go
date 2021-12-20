@@ -1,9 +1,12 @@
 package addons
 
 import (
+	"k8s-cluster/spec"
+
+	corev1 "github.com/pulumi/pulumi-kubernetes/sdk/v3/go/kubernetes/core/v1"
+	metav1 "github.com/pulumi/pulumi-kubernetes/sdk/v3/go/kubernetes/meta/v1"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi/config"
-	"k8s-cluster/spec"
 )
 
 type Addons struct {
@@ -32,10 +35,10 @@ type MetalLbPool struct {
 }
 
 type NginxIngress struct {
-	Name string
-	Domain string
+	Name    string
+	Domain  string
 	KubeAPI NginxKubeAPI
-	Helm   *HelmParams
+	Helm    *HelmParams
 }
 
 type NginxKubeAPI struct {
@@ -43,10 +46,10 @@ type NginxKubeAPI struct {
 }
 
 type Kilo struct {
-	PrivateKey string
-	Crds       *CRDS
-	Version    string
-	Peers      []KiloPeer
+	PrivateKey  string
+	Crds        *CRDS
+	Version     string
+	Peers       []KiloPeer
 	ExternalIPs []string
 }
 
@@ -72,13 +75,40 @@ func Init(ctx *pulumi.Context, s *spec.ClusterSpec) (*Addons, error) {
 	cfg := config.New(ctx, "")
 	cfg.RequireSecretObject("addons", &pulumiAddonsCfg)
 
+	_, err := corev1.NewLimitRange(ctx, namespace, &corev1.LimitRangeArgs{
+		ApiVersion: pulumi.String("v1"),
+		Kind:       pulumi.String("LimitRange"),
+		Metadata: &metav1.ObjectMetaArgs{
+			Name:      pulumi.String("mem-range"),
+			Namespace: pulumi.String(namespace),
+		},
+		Spec: &corev1.LimitRangeSpecArgs{
+			Limits: corev1.LimitRangeItemArray{
+				&corev1.LimitRangeItemArgs{
+					Default: pulumi.StringMap{
+						"memory": pulumi.String("128Mi"),
+						"cpu":    pulumi.String("200m"),
+					},
+					DefaultRequest: pulumi.StringMap{
+						"memory": pulumi.String("64Mi"),
+						"cpu":    pulumi.String("100m"),
+					},
+					Type: pulumi.String("Container"),
+				},
+			},
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	a := &Addons{
 		Namespace: namespace,
 		ctx:       ctx,
 		NginxIngress: &NginxIngress{
-			Name:   "nginx-ingress-addon",
-			Domain: s.InternalDomainZone,
-			Helm:   pulumiAddonsCfg.NginxIngress.Helm,
+			Name:    "nginx-ingress-addon",
+			Domain:  s.InternalDomainZone,
+			Helm:    pulumiAddonsCfg.NginxIngress.Helm,
 			KubeAPI: pulumiAddonsCfg.NginxIngress.KubeAPI,
 		},
 		MetalLb: pulumiAddonsCfg.MetalLb,

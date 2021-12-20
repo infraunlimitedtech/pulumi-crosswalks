@@ -27,8 +27,28 @@ func (a *Addons) RunNginxIngress() error {
 				"nodeSelector": pulumi.Map{
 					"node-role.kubernetes.io/master": pulumi.String("true"),
 				},
+				"tolerations": pulumi.MapArray{
+					pulumi.Map{
+						"operator": pulumi.String("Exists"),
+						"key":      pulumi.String("CriticalAddonsOnly"),
+					},
+					pulumi.Map{
+						"operator": pulumi.String("Exists"),
+						"key":      pulumi.String("node-role.kubernetes.io/control-plane"),
+					},
+				},
 				"enableTLSPassthrough": pulumi.Bool(true),
 				"ingressClass":         pulumi.String(ingressClassName),
+				"resources": pulumi.Map{
+					"requests": pulumi.Map{
+						"memory": pulumi.String("64Mi"),
+						"cpu":    pulumi.String("25m"),
+					},
+					"limits": pulumi.Map{
+						"memory": pulumi.String("96Mi"),
+						"cpu":    pulumi.String("50m"),
+					},
+				},
 				"service": pulumi.Map{
 					"create": pulumi.Bool(false),
 				},
@@ -91,7 +111,7 @@ func (a *Addons) RunNginxIngress() error {
 			Selector: pulumi.StringMap{
 				"app": pulumi.String(a.NginxIngress.Name),
 			},
-			Type:                  pulumi.String("ClusterIP"),
+			Type:      pulumi.String("ClusterIP"),
 			ClusterIP: pulumi.String(a.NginxIngress.KubeAPI.ClusterIP),
 			Ports: corev1.ServicePortArray{
 				&corev1.ServicePortArgs{

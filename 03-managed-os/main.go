@@ -1,8 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"errors"
+	"fmt"
 
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 	"github.com/spigell/pulumi-k3os/sdk/go/k3os"
@@ -68,9 +68,10 @@ func main() {
 					},
 				},
 				K3OS: &k3os.K3OSArgs{
-					Token:   pulumi.String(config.K3os.Token),
-					K3sArgs: pulumi.ToStringArray(config.K3os.K3sArgs),
-					Labels:  pulumi.ToStringMap(config.K3os.Labels),
+					Token:      pulumi.String(config.K3os.Token),
+					K3sArgs:    pulumi.ToStringArray(config.K3os.K3sArgs),
+					Labels:     pulumi.ToStringMap(config.K3os.Labels),
+					Taints:     pulumi.ToStringArray(config.K3os.Taints),
 					NtpServers: pulumi.ToStringArray(config.K3os.NtpServers),
 				},
 			},
@@ -109,13 +110,13 @@ func main() {
 						},
 					},
 					K3OS: &k3os.K3OSArgs{
-						Token:     pulumi.String(config.K3os.Token),
-						ServerUrl: pulumi.String(cluster.serverURL),
-						K3sArgs:   pulumi.ToStringArray(config.K3os.K3sArgs),
-						Labels:    pulumi.ToStringMap(config.K3os.Labels),
+						Token:      pulumi.String(config.K3os.Token),
+						ServerUrl:  pulumi.String(cluster.serverURL),
+						K3sArgs:    pulumi.ToStringArray(config.K3os.K3sArgs),
+						Labels:     pulumi.ToStringMap(config.K3os.Labels),
 						NtpServers: pulumi.ToStringArray(config.K3os.NtpServers),
+						Taints:     pulumi.ToStringArray(config.K3os.Taints),
 					},
-
 				},
 			}, pulumi.DependsOn([]pulumi.Resource{leader}))
 			if err != nil {

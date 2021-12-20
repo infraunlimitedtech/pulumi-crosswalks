@@ -14,6 +14,27 @@ func (a *Addons) RunMetricServer() error {
 			Repo: pulumi.String("https://charts.bitnami.com/bitnami"),
 		},
 		Values: pulumi.Map{
+			"nodeSelector": pulumi.Map{
+				"node-role.kubernetes.io/control-plane": pulumi.String("true"),
+			},
+			"tolerations": pulumi.MapArray{
+				pulumi.Map{
+					"operator": pulumi.String("Exists"),
+					"key":      pulumi.String("CriticalAddonsOnly"),
+				},
+				pulumi.Map{
+					"operator": pulumi.String("Exists"),
+					"key":      pulumi.String("node-role.kubernetes.io/control-plane"),
+				},
+			},
+			"resources": pulumi.Map{
+				"requests": pulumi.Map{
+					"memory": pulumi.String("16Mi"),
+				},
+				"limits": pulumi.Map{
+					"memory": pulumi.String("32Mi"),
+				},
+			},
 			"apiService": pulumi.Map{
 				"create": pulumi.Bool(true),
 			},

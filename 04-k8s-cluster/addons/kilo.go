@@ -182,21 +182,17 @@ cp secrets/* /var/lib/kilo/`),
 					},
 				},
 				Spec: &corev1.PodSpecArgs{
-					/*											Tolerations: corev1.TolerationArray{
+					Tolerations: corev1.TolerationArray{
 						&corev1.TolerationArgs{
-							Key:               pulumi.String("node.kubernetes.io/unreachable"),
-							Operator:          pulumi.String("Exists"),
-							Effect:            pulumi.String("NoExecute"),
-							TolerationSeconds: pulumi.Int(2),
+							Key:      pulumi.String("CriticalAddonsOnly"),
+							Operator: pulumi.String("Exists"),
 						},
 						&corev1.TolerationArgs{
-							Key:               pulumi.String("node.kubernetes.io/not-ready"),
-							Operator:          pulumi.String("Exists"),
-							Effect:            pulumi.String("NoExecute"),
-							TolerationSeconds: pulumi.Int(2),
+							Key:      pulumi.String("node-role.kubernetes.io/control-plane"),
+							Operator: pulumi.String("Exists"),
 						},
 					},
-					*/NodeSelector: pulumi.StringMap{
+					NodeSelector: pulumi.StringMap{
 						"node-role.kubernetes.io/master": pulumi.String("true"),
 					},
 					ServiceAccountName: serviceAccount.Metadata.Name().Elem(),
@@ -222,6 +218,16 @@ cp secrets/* /var/lib/kilo/`),
 											FieldPath: pulumi.String("spec.nodeName"),
 										},
 									},
+								},
+							},
+							Resources: &corev1.ResourceRequirementsArgs{
+								Requests: pulumi.StringMap{
+									"memory": pulumi.String("32Mi"),
+									"cpu":    pulumi.String("50m"),
+								},
+								Limits: pulumi.StringMap{
+									"memory": pulumi.String("64Mi"),
+									"cpu":    pulumi.String("50m"),
 								},
 							},
 							Ports: corev1.ContainerPortArray{
@@ -365,7 +371,7 @@ cp secrets/* /var/lib/kilo/`),
 			Namespace: pulumi.String(a.Namespace),
 		},
 		Spec: &corev1.ServiceSpecArgs{
-			Type:                  pulumi.String("ClusterIP"),
+			Type: pulumi.String("ClusterIP"),
 			Selector: pulumi.StringMap{
 				"app.kubernetes.io/name":    pulumi.String("kilo"),
 				"app.kubernetes.io/part-of": pulumi.String("kilo"),
