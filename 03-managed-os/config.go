@@ -66,6 +66,10 @@ func buildNodeConfig(pulumiCfg *pulumiConfig, node Node) (*k3os.NodeConfig, erro
 		config.K3os.K3sArgs = append(config.K3os.K3sArgs, "--cluster-init")
 	}
 
+	if config.Hostname == "" {
+		config.Hostname = node.ID
+	}
+
 	return config, nil
 }
 

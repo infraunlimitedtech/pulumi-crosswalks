@@ -49,6 +49,14 @@ config:
           privatekey:
             secure: v1:EzWkMiRurOepDH/e:TS9wXzfbXrpes1o/KorXxKISs3tinDBqxnxy1mdgBip6XMSjvO2y3e+8Dz9o6uH+ujNEH7iiBVC8H4Wk
           publickey: 7BV6HhME/FqnDs95WZvm1IJaYiZXfNxy9/BK1TJvAjw=
+      - config:
+          hostname: k3s-agent03.production.infraunlimited.tech
+        id: k3s-agent03
+        wireguard:
+          privateaddr: 192.168.88.6
+          privatekey:
+            secure: v1:s/bEAa3CHNZKZzZm:PambCzeskNQ3a5OSBGUqPki4awU/pBFNoIpVHuGLcZsC70ubUrLGbQDxIY9xmlvmDKV2NpkckS/jUMfI
+          publickey: 706SwbRc9rj/1nArQzfxfiuVRvKk5uHv3kuGmH6OxRw=
       servers:
       - id: k3s-server01
         leader: true

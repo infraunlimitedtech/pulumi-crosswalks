@@ -57,7 +57,7 @@ func main() {
 				Key:  extractConnectionArg(nodesInfo, cluster.leader.ID, "key"),
 			},
 			NodeConfiguration: &k3os.NodeConfigurationArgs{
-				Hostname: pulumi.String(cluster.leader.ID),
+				Hostname: pulumi.String(config.Hostname),
 				RunCmd:   pulumi.ToStringArray(config.Runcmd),
 				BootCmd:  pulumi.ToStringArray(config.Bootcmd),
 				WriteFiles: &k3os.CloudInitFilesArray{
@@ -98,7 +98,7 @@ func main() {
 					Key:  extractConnectionArg(nodesInfo, node.ID, "key"),
 				},
 				NodeConfiguration: &k3os.NodeConfigurationArgs{
-					Hostname: pulumi.String(node.ID),
+					Hostname: pulumi.String(config.Hostname),
 					BootCmd:  pulumi.ToStringArray(config.Bootcmd),
 					RunCmd:   pulumi.ToStringArray(config.Runcmd),
 					WriteFiles: &k3os.CloudInitFilesArray{
