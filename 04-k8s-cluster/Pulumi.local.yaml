@@ -11,17 +11,8 @@ config:
       privateKey:
         secure: AAABANecFG5q5Hk2Sg3tlvzIsnyuZLqbhwpPYpd4ipgpB72awOrWYYr/WJ3lUCTT1wyTBKGToGYcseRIFtp+BU3UEFHjto5o41jdUA==
       version: 0.3.0
-      externalIPs: 
-        - 192.168.99.135
-    metallb:
-      pools:
-        default:
-          network: 192.168.75.240/29
-        kubeapi:
-          network: 192.168.75.249/32
-      helm:
-        version: 0.11.0
     nginxIngress:
+      replica: 1
       helm:
         version: 0.12.1
       kubeapi:

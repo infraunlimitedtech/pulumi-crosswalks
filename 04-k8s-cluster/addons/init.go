@@ -38,6 +38,7 @@ type NginxIngress struct {
 	Name    string
 	Domain  string
 	KubeAPI NginxKubeAPI
+	Replica int
 	Helm    *HelmParams
 }
 

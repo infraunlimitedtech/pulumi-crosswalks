@@ -5,8 +5,6 @@ config:
     kilo:
       crds:
         path: crds/sources/squat/kilo
-      externalIPs:
-      - 192.168.0.213
       peers:
       - allowedIPs:
         - 10.5.0.1/32

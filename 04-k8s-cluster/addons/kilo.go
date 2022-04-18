@@ -196,7 +196,7 @@ cp secrets/* /var/lib/kilo/`),
 						"node-role.kubernetes.io/master": pulumi.String("true"),
 					},
 					ServiceAccountName: serviceAccount.Metadata.Name().Elem(),
-					HostNetwork:        pulumi.Bool(false),
+					HostNetwork:        pulumi.Bool(true),
 					Containers: corev1.ContainerArray{
 						&corev1.ContainerArgs{
 							Name:  pulumi.String("kilo"),
@@ -383,7 +383,6 @@ cp secrets/* /var/lib/kilo/`),
 					Port:     pulumi.Int(vpnPort),
 				},
 			},
-			ExternalIPs: pulumi.ToStringArray(a.Kilo.ExternalIPs),
 		},
 	})
 	if err != nil {
