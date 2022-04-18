@@ -15,4 +15,7 @@ inventories/production/etcd/*
 packer_cache
 *.client.conf
 kubeconfig
-
+*.iso
+*.qcow2
+wg.conf
+output/*

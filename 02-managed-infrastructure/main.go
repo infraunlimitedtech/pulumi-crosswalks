@@ -1,51 +1,67 @@
 package main
 
 import (
-	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
-	"github.com/pulumi/pulumi/sdk/v3/go/pulumi/config"
-
+	"managed-infrastructure/config"
 	"managed-infrastructure/infra"
+	"managed-infrastructure/providers/hetzner"
 	"managed-infrastructure/providers/libvirt"
 	"managed-infrastructure/providers/vagrant"
-)
+	"managed-infrastructure/providers/yandex"
 
-type mainConfig struct {
-	Provider      string
-	IdentityStack string `json:"identitystack"`
-}
+	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
+)
 
 func main() {
 	pulumi.Run(func(ctx *pulumi.Context) error {
-		var mainCfg mainConfig
-		cfg := config.New(ctx, "")
-		cfg.RequireObject("main", &mainCfg)
+		cfg := config.ParseConfig(ctx)
 
-		identityStack, err := pulumi.NewStackReference(ctx, mainCfg.IdentityStack, nil)
+		var err error
+		identityStack, err := pulumi.NewStackReference(ctx, cfg.Main.IdentityStack, nil)
 		if err != nil {
 			return err
 		}
 
 		sshCreds := identityStack.GetOutput(pulumi.String("identity:ssh:server_access:credentials"))
 
-		var i infra.Infra
-		switch mainCfg.Provider {
+		var i infra.ComputeInfra
+		switch cfg.Main.Providers.Compute {
+		case "libvirt":
+			i, err = libvirt.ManageCompute(ctx, sshCreds, cfg.Compute.Libvirt)
+			if err != nil {
+				return err
+			}
+		case "hetzner":
+			i, err = hetzner.ManageCompute(ctx)
+			if err != nil {
+				return err
+			}
 		case "vagrant":
 			ctx.Log.Warn("Vagrant stack is not implemented yet. Controlled via Vagrant", nil)
 			i = vagrant.Init(sshCreds)
-		case "libvirt":
-			var libvirtCfg libvirt.Config
-			var err error
-			cfg.RequireSecretObject("libvirt", &libvirtCfg)
-			i, err = libvirt.Init(ctx, sshCreds, &libvirtCfg)
+		default:
+			ctx.Log.Error("Unknown compute provider", nil)
+			return nil
+		}
+
+		var s infra.S3Infra
+		switch cfg.Main.Providers.S3 {
+		case "yandex":
+			creds := identityStack.GetOutput(pulumi.String("identity:yandex:s3"))
+			p, err := yandex.InitProvider(ctx, creds)
+			if err != nil {
+				return err
+			}
+			s, err = yandex.ManageS3(ctx, cfg.S3.Yandex, creds, p)
 			if err != nil {
 				return err
 			}
 		default:
-			ctx.Log.Error("Unknown provider", nil)
+			ctx.Log.Error("Unknown S3 provider", nil)
 			return nil
 		}
 
 		ctx.Export("infra:nodes:info", pulumi.ToMapMap(i.GetNodes()))
+		ctx.Export("infra:storage:info", pulumi.ToMapMap(s.GetStorage()))
 		return nil
 	})
 }

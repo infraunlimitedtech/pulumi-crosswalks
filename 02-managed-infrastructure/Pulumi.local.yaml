@@ -1,4 +1,30 @@
 config:
+  managed-infrastructure:compute:
+    libvirt:
+      hypervisors:
+      - machines:
+        - id: k3s-server01
+        - id: k3s-agent01
+        - id: k3s-agent02
+        - id: k3s-agent03
+        - id: k3s-agent04
+        name: kvm-local
+        network:
+          cidr: 192.168.99.144/28
+        uri: qemu:///system
+      images:
+        base: /home/spigell/projects/infra/infraUnlimited/pulumi-crosswalks/02-managed-infrastructure/images/microos/openSUSE-MicroOS.x86_64-kvm-and-xen.qcow2
+        combustion: /home/spigell/projects/infra/infraUnlimited/pulumi-crosswalks/02-managed-infrastructure/images/microos/combustion.qcow2
+      network:
+        name: infraunlimited
   managed-infrastructure:main:
-    provider: vagrant
     identitystack: spigell/identity/local
+    providers:
+      compute: libvirt
+      s3: yandex
+  managed-infrastructure:s3:
+    yandex:
+      buckets:
+      - acl: private
+        id: backup
+        prefix: infraunlimited-backup-local
