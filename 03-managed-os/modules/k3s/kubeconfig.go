@@ -29,9 +29,11 @@ func (c *Cluster) grabKubeConfig(deps []map[string]pulumi.Resource) (*pulumi.Str
 			panic("Failed to parse kubeconfig")
 		}
 
-		ctx := fmt.Sprintf("%s-direct", c.Ctx.Stack())
-		kubeconfig.Contexts[ctx] = kubeconfig.Contexts["default"]
+		ctxName := fmt.Sprintf("%s-direct", c.Ctx.Stack())
+
+		kubeconfig.Contexts[ctxName] = kubeconfig.Contexts["default"]
 		delete(kubeconfig.Contexts, "default")
+		kubeconfig.CurrentContext = ctxName
 
 		w, _ := clientcmd.Write(*kubeconfig)
 
