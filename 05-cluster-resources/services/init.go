@@ -1,8 +1,6 @@
 package services
 
 import (
-	globalconfigurationsrv1 "cluster-resources/crds/generated/nginxinc/kubernetes-ingress/k8s/v1alpha1"
-
 	corev1 "github.com/pulumi/pulumi-kubernetes/sdk/v3/go/kubernetes/core/v1"
 	metav1 "github.com/pulumi/pulumi-kubernetes/sdk/v3/go/kubernetes/meta/v1"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
@@ -26,9 +24,9 @@ type LoadBalancersInfra struct {
 }
 
 type NginxIngressInfra struct {
-	Name           string
-	UDPDNSListener *globalconfigurationsrv1.GlobalConfigurationSpecListenersArgs
-	Helm           *HelmParams
+	Name      string
+	ClusterIP string
+	Helm      *HelmParams
 }
 
 type ConsulInfra struct {
@@ -63,6 +61,50 @@ func Init(ctx *pulumi.Context) (*Infra, error) {
 		return nil, err
 	}
 
+	_, err = corev1.NewResourceQuota(ctx, namespace, &corev1.ResourceQuotaArgs{
+		ApiVersion: pulumi.String("v1"),
+		Kind:       pulumi.String("ResourceQuota"),
+		Metadata: &metav1.ObjectMetaArgs{
+			Namespace: pulumi.String(namespace),
+			Name:      pulumi.String("cpu-mem-limit"),
+		},
+		Spec: &corev1.ResourceQuotaSpecArgs{
+			Hard: pulumi.StringMap{
+				"requests.cpu":    pulumi.String("3"),
+				"requests.memory": pulumi.String("3Gi"),
+				"limits.cpu":      pulumi.String("4"),
+				"limits.memory":   pulumi.String("4Gi"),
+			},
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = corev1.NewLimitRange(ctx, namespace, &corev1.LimitRangeArgs{
+		ApiVersion: pulumi.String("v1"),
+		Kind:       pulumi.String("LimitRange"),
+		Metadata: &metav1.ObjectMetaArgs{
+			Name:      pulumi.String("mem-range"),
+			Namespace: pulumi.String(namespace),
+		},
+		Spec: &corev1.LimitRangeSpecArgs{
+			Limits: corev1.LimitRangeItemArray{
+				&corev1.LimitRangeItemArgs{
+					Default: pulumi.StringMap{
+						"memory": pulumi.String("128Mi"),
+						"cpu":    pulumi.String("200m"),
+					},
+					DefaultRequest: pulumi.StringMap{
+						"memory": pulumi.String("64Mi"),
+						"cpu":    pulumi.String("100m"),
+					},
+					Type: pulumi.String("Container"),
+				},
+			},
+		},
+	})
+
 	i := &Infra{
 		Namespace: namespace,
 		ctx:       ctx,
@@ -71,13 +113,9 @@ func Init(ctx *pulumi.Context) (*Infra, error) {
 		},
 		LB: &LoadBalancersInfra{
 			NginxIngress: &NginxIngressInfra{
-				Name: "nginx-ingress",
-				UDPDNSListener: &globalconfigurationsrv1.GlobalConfigurationSpecListenersArgs{
-					Name:     pulumi.String("dns-udp"),
-					Port:     pulumi.Int(53),
-					Protocol: pulumi.String("UDP"),
-				},
-				Helm: pulumiCfg.LB.NginxIngress.Helm,
+				Name:      "nginx-ingress",
+				ClusterIP: pulumiCfg.LB.NginxIngress.ClusterIP,
+				Helm:      pulumiCfg.LB.NginxIngress.Helm,
 			},
 		},
 		Consul: pulumiCfg.Consul,

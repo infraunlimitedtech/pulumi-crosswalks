@@ -2,72 +2,46 @@ config:
   managed-os:main:
     defaults:
       agents:
-        k3os:
-          k3s_args:
-          - agent
-          - --kubelet-arg=node-status-update-frequency=20s
-          - --kubelet-arg=system-reserved=cpu=100m,memory=100Mi
+        k3s:
+          config:
+            kubelet-arg:
+              - node-status-update-frequency=20s
+              - system-reserved=cpu=100m,memory=100Mi
       global:
-        boot_cmd:
-        - echo Greetings from K3OS cluster!
-        k3os:
-          labels:
-            k3os.io/upgrade: disabled
-          token:
-            secure: AAABAK45Ndr8ZrWSFRSYy2ZxUsdb5SsaTnPgMuIU1IDVmUMOj6o=
-          ntp_servers:
-            - 0.us.pool.ntp.org
-            - 1.us.pool.ntp.org
-        run_cmd:
-        - sudo sed -e '/^rancher/p' -e 's/^rancher/vagrant/' -i /etc/passwd
-        - sudo sed -i 's/NetworkInterfaceBlacklist=veth/NetworkInterfaceBlacklist=veth,eth1/' /etc/connman/main.conf
-        - sudo rc-service connman restart
-        - sleep 5
-        - sudo ip l set up eth1 && . /var/lib/rancher/k3os/infra-env && sudo ip a add ${PrivateIP}/24 dev eth1
+        wireguard:
+          cidr: 192.168.77.0/24
+        k3s:
+          version: v1.23.5+k3s1
+          config:
+            node-ip: 127.0.0.1
+            node-label:
+              - k3os.io/upgrade=disabled
+            token: token
       servers:
-        k3os:
-          k3s_args:
-          - server
-          - --cluster-cidr=10.40.0.0/16
-          - --service-cidr=10.41.0.0/16
-          - --cluster-domain=local.intra.infraunlimited.tech
-          - --cluster-dns=10.41.0.10
-          - --disable=traefik
-          - --disable=servicelb
-          - --disable-cloud-controller
-          - --disable=metrics-server
-          - --kube-apiserver-arg=default-not-ready-toleration-seconds=60
-          - --kube-apiserver-arg=default-unreachable-toleration-seconds=60
-          - --kubelet-arg=node-status-update-frequency=20s
-          - --kube-controller-manager-arg=node-monitor-grace-period=2m
-          - --kubelet-arg=system-reserved=cpu=1,memory=1Gi
-          taints:
-          - CriticalAddonsOnly=true:NoExecute
-          - node-role.kubernetes.io/control-plane:NoSchedule
+        k3s:
+          config:
+            cluster-cidr: 10.40.0.0/16
+            cluster-dns: 10.41.0.10
+            service-cidr: 10.41.0.0/16
+            cluster-domain: local.intra.infraunlimited.tech
+            disable-cloud-controller: true
+            disable:
+              - metrics-server
+              - traefik
+              - servicelb
+            kube-controller-manager-arg:
+              - node-monitor-grace-period=2m
+            kube-apiserver-arg:
+              - default-not-ready-toleration-seconds=60
+              - default-unreachable-toleration-seconds=60
+            kubelet-arg:
+              - node-status-update-frequency=20s
+              - system-reserved=cpu=1,memory=1Gi
+            node-taint:
+              - CriticalAddonsOnly=true:NoExecute
+              - node-role.kubernetes.io/control-plane:NoSchedule
     infra_stack: spigell/managed-infrastructure/local
     nodes:
-      agents:
-      - config:
-          k3os:
-            labels:
-              node.infraunlimited.tech/type: vagrant
-        id: k3s-agent01
-        wireguard:
-          privateaddr: 192.168.77.3
-          privatekey: 4BJUrT80rCNgurgstPwz8zIto/iyXrWkW2gN1JGAzEQ=
-          publickey: CbbdbGwrPuKmZJ6Isusg5y0UjfMwJeLeAdhRBXtnyDA=
-      - id: k3s-agent02
-        wireguard:
-          privateaddr: 192.168.77.4
-          privatekey: mAEqDsg+Qnonc8tUK8povXs7oDBbVD6Wg7Gk88M+f0o=
-          publickey: bVOtrGF5S8OKFUlysqZKdpz/7LEevPpFcnogexp7Y04=
-      - id: k3s-agent03
-        config:
-          hostname: k3s-agent03.local.infraunlimited.tech
-        wireguard:
-          privateaddr: 192.168.77.6
-          privatekey: OFeHvlmlfhBrXvfAub4sKmPdc2OsqPIRPvkLsuKvIHM=
-          publickey: IkePTRJNuz4onM7RslyYcDggQ+dwf3ZAyf4w5sFqaQw=
       servers:
       - id: k3s-server01
         leader: true
@@ -76,16 +50,14 @@ config:
           - allowed_ips:
             - 192.168.77.99/32
             publickey: s5FZRUbMajKGH+KBGUQpbG9TrK4sWaafnVpRTJErOx0=
-          privateaddr: 192.168.77.1
-          privatekey: EJRPP7G2iJiyJsvJ6IvK10wP8piYrKAOmYwkc28iMXA=
-          publickey: tpmTgaqqJuUx6fs9EFWBRFa0MyqH+Z2bp1vUNzXE51I=
-      - id: k3s-server02
+      agents:
+      - id: k3s-agent01
+        k3s:
+          config:
+            node-label:
+              - 'node.infraunlimited.tech/type=vagrant'
         wireguard:
-          privateaddr: 192.168.77.2
-          privatekey: KNYgvlhpO0f5dk0EHSroB6yJ2Z7QuIGalWPEiQHw12g=
-          publickey: cQ0dxNsFyv1zK9gXOO/cFSphVP8BVkN+7MXbKsfcYFE=
-      - id: k3s-server03
-        wireguard:
-          privateaddr: 192.168.77.5
-          privatekey: OCMTzeachWyfE0shJIKhdyRGnsB4VpCV1FJllKWTY3Q=
-          publickey: rn4wJLOwXWVp5HO4U6NMNN4nSVDExpdOuRIHnjiZV1Q=
+          ip: 192.168.77.10
+      - id: k3s-agent02
+      - id: k3s-agent03
+

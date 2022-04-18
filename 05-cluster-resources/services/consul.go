@@ -1,10 +1,6 @@
 package services
 
 import (
-	"fmt"
-
-	nginxv1alpha1 "cluster-resources/crds/generated/nginxinc/kubernetes-ingress/k8s/v1alpha1"
-
 	corev1 "github.com/pulumi/pulumi-kubernetes/sdk/v3/go/kubernetes/core/v1"
 	helmv3 "github.com/pulumi/pulumi-kubernetes/sdk/v3/go/kubernetes/helm/v3"
 	metav1 "github.com/pulumi/pulumi-kubernetes/sdk/v3/go/kubernetes/meta/v1"
@@ -57,12 +53,10 @@ func (infra *Infra) RunConsulStack() error {
 				"storage": pulumi.String("1Gi"),
 				"resources": pulumi.Map{
 					"requests": pulumi.Map{
-						"memory": pulumi.String("50Mi"),
-						"cpu":    pulumi.String("50m"),
+						"cpu": pulumi.String("50m"),
 					},
 					"limits": pulumi.Map{
-						"memory": pulumi.String("50Mi"),
-						"cpu":    pulumi.String("50m"),
+						"cpu": pulumi.String("50m"),
 					},
 				},
 				"extraConfig": pulumi.String("{    \"log_level\": \"DEBUG\"  }"),
@@ -70,11 +64,11 @@ func (infra *Infra) RunConsulStack() error {
 			"client": pulumi.Map{
 				"resources": pulumi.Map{
 					"requests": pulumi.Map{
-						"memory": pulumi.String("50Mi"),
+						"memory": pulumi.String("64Mi"),
 						"cpu":    pulumi.String("50m"),
 					},
 					"limits": pulumi.Map{
-						"memory": pulumi.String("50Mi"),
+						"memory": pulumi.String("64Mi"),
 						"cpu":    pulumi.String("50m"),
 					},
 				},
@@ -90,11 +84,11 @@ func (infra *Infra) RunConsulStack() error {
 				"toK8S": pulumi.Bool(false),
 				"resources": pulumi.Map{
 					"requests": pulumi.Map{
-						"memory": pulumi.String("20Mi"),
+						"memory": pulumi.String("16Mi"),
 						"cpu":    pulumi.String("20m"),
 					},
 					"limits": pulumi.Map{
-						"memory": pulumi.String("30Mi"),
+						"memory": pulumi.String("32Mi"),
 						"cpu":    pulumi.String("30m"),
 					},
 				},
@@ -105,60 +99,5 @@ func (infra *Infra) RunConsulStack() error {
 		return err
 	}
 
-	nginxIngressDNSUpstreamName := "dns"
-
-	_, err = nginxv1alpha1.NewTransportServer(infra.ctx, "nginx-transport-server-dns", &nginxv1alpha1.TransportServerArgs{
-		Metadata: &metav1.ObjectMetaArgs{
-			Name:      pulumi.String("consul-dns"),
-			Namespace: pulumi.String(infra.Namespace),
-		},
-		Spec: &nginxv1alpha1.TransportServerSpecArgs{
-			Listener: &nginxv1alpha1.TransportServerSpecListenerArgs{
-				Name:     infra.LB.NginxIngress.UDPDNSListener.Name,
-				Protocol: infra.LB.NginxIngress.UDPDNSListener.Protocol,
-			},
-			Upstreams: &nginxv1alpha1.TransportServerSpecUpstreamsArray{
-				&nginxv1alpha1.TransportServerSpecUpstreamsArgs{
-					Name: pulumi.String(nginxIngressDNSUpstreamName),
-					// Same as https://github.com/hashicorp/consul-helm/blob/master/templates/dns-service.yaml#L6
-					Service: pulumi.String(fmt.Sprintf("%s-dns", serviceName)),
-					Port:    pulumi.Int(53),
-				},
-			},
-			Action: &nginxv1alpha1.TransportServerSpecActionArgs{
-				Pass: pulumi.String(nginxIngressDNSUpstreamName),
-			},
-		},
-	})
-
-	if err != nil {
-		return err
-	}
-
-	_, err = corev1.NewService(infra.ctx, "nginx-lb-dns", &corev1.ServiceArgs{
-		ApiVersion: pulumi.String("v1"),
-		Kind:       pulumi.String("Service"),
-		Metadata: &metav1.ObjectMetaArgs{
-			Name:      pulumi.String("dns"),
-			Namespace: pulumi.String(infra.Namespace),
-		},
-		Spec: &corev1.ServiceSpecArgs{
-			Selector: pulumi.StringMap{
-				"app": pulumi.String(infra.LB.NginxIngress.Name),
-			},
-			Type:           pulumi.String("LoadBalancer"),
-			LoadBalancerIP: pulumi.String("192.168.75.1"),
-			Ports: corev1.ServicePortArray{
-				&corev1.ServicePortArgs{
-					Name:     infra.LB.NginxIngress.UDPDNSListener.Name,
-					Protocol: infra.LB.NginxIngress.UDPDNSListener.Protocol,
-					Port:     pulumi.Int(53),
-				},
-			},
-		},
-	}, pulumi.DeleteBeforeReplace(true))
-	if err != nil {
-		return err
-	}
 	return nil
 }

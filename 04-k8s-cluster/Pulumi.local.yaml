@@ -23,7 +23,7 @@ config:
         version: 0.11.0
     nginxIngress:
       helm:
-        version: 0.10.0
+        version: 0.12.1
       kubeapi:
         clusterIp: 10.41.1.1
   k8s-cluster:spec:

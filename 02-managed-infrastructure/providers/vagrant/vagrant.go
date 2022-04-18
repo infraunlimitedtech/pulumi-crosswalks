@@ -1,8 +1,9 @@
 package vagrant
 
 import (
-	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 	"managed-infrastructure/utils"
+
+	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
 
 type Infra struct {

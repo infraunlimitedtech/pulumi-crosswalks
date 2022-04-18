@@ -16,6 +16,10 @@ func main() {
 			return err
 		}
 
+//		if err := infra.RunPrometheus(); err != nil {
+//			return err
+//		}
+
 		return infra.RunConsulStack()
 	})
 }

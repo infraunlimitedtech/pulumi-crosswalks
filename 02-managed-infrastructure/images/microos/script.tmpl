@@ -1,0 +1,20 @@
+#!/bin/bash
+# combustion: network
+# Set a password for root, generate the hash with "openssl passwd -6"
+mount /home
+echo 'root:$ROOT_PWD' | chpasswd -e
+useradd -m $USER
+mkdir -pm 700 /home/$USER/.ssh
+chown $USER:$USER /home/$USER/.ssh
+cat $KEY > /home/$USER/.ssh/authorized_keys
+chmod 600 /home/$USER/.ssh/authorized_keys
+chown $USER:$USER /home/$USER/.ssh/authorized_keys
+
+echo "$USER ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/$USER
+
+systemctl enable sshd.service
+# Install packages
+zypper --non-interactive install htop
+# Leave a marker
+echo "Configured with combustion" > /etc/issue.d/combustion
+
