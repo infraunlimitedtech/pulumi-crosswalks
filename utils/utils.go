@@ -28,7 +28,7 @@ func ExtractStringFromPulumiMap(m pulumi.AnyOutput, valueKey string) pulumi.Stri
 	return m.ApplyT(func(v interface{}) string {
 		e, ok := v.(map[string]interface{})
 		if !ok {
-			panic(fmt.Sprintf("It is not a map!"))
+			panic("It is not a map!")
 		}
 		return e[valueKey].(string)
 	}).(pulumi.StringOutput)

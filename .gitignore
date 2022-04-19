@@ -19,3 +19,4 @@ kubeconfig
 *.qcow2
 wg.conf
 output/*
+*local*

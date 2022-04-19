@@ -18,7 +18,6 @@ ssh_authorized_keys:
 func ManageCompute(ctx *pulumi.Context) (*ComputedInfra, error) {
 	nodes := make(map[string]map[string]interface{})
 	err := manage(ctx)
-
 	if err != nil {
 		return nil, err
 	}

@@ -1,8 +1,8 @@
 package yandex
 
 import (
-	"fmt"
 	"errors"
+	"fmt"
 
 	"github.com/pulumi/pulumi-yandex/sdk/go/yandex"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
@@ -13,8 +13,8 @@ type S3Config struct {
 }
 
 type Bucket struct {
-	ID   string
-	Acl string
+	ID     string
+	ACL    string
 	Bucket string
 	Prefix string
 }
@@ -27,7 +27,7 @@ func ManageS3(ctx *pulumi.Context, cfg *S3Config, creds pulumi.AnyOutput, p *yan
 	s := make(map[string]map[string]interface{})
 	for _, bucket := range cfg.Buckets {
 		args := &yandex.StorageBucketArgs{
-			Acl: pulumi.String(bucket.Acl),
+			Acl: pulumi.String(bucket.ACL),
 		}
 
 		if bucket.ID == "" {

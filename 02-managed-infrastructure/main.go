@@ -55,13 +55,17 @@ func main() {
 			if err != nil {
 				return err
 			}
+		case "none":
 		default:
 			ctx.Log.Error("Unknown S3 provider", nil)
 			return nil
 		}
 
 		ctx.Export("infra:nodes:info", pulumi.ToMapMap(i.GetNodes()))
-		ctx.Export("infra:storage:info", pulumi.ToMapMap(s.GetStorage()))
+
+		if cfg.Main.Providers.S3 != "none" {
+			ctx.Export("infra:storage:info", pulumi.ToMapMap(s.GetStorage()))
+		}
 		return nil
 	})
 }

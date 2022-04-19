@@ -1,11 +1,12 @@
 package config
 
 import (
-	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
-	"github.com/pulumi/pulumi/sdk/v3/go/pulumi/config"
 	"managed-infrastructure/providers/hetzner"
 	"managed-infrastructure/providers/libvirt"
 	"managed-infrastructure/providers/yandex"
+
+	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
+	"github.com/pulumi/pulumi/sdk/v3/go/pulumi/config"
 )
 
 type mainConfig struct {

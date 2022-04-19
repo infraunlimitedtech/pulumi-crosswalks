@@ -2,12 +2,11 @@ package main
 
 import (
 	"fmt"
+	"identity/github"
+	"identity/yandex"
 
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi/config"
-
-	"identity/github"
-	"identity/yandex"
 )
 
 type LocalUsersConfig struct {
@@ -35,6 +34,10 @@ type GithubConfig struct {
 	Managed bool
 }
 
+type YandexConfig struct {
+	Managed bool
+}
+
 func main() {
 	pulumi.Run(func(ctx *pulumi.Context) error {
 		cfg := config.New(ctx, "")
@@ -44,6 +47,9 @@ func main() {
 
 		var githubCfg GithubConfig
 		cfg.RequireObject("github", &githubCfg)
+
+		var yandexCfg YandexConfig
+		cfg.RequireObject("yandex", &yandexCfg)
 
 		var localUsers LocalUsersConfig
 		cfg.RequireObject("local_users", &localUsers)
@@ -63,14 +69,16 @@ func main() {
 
 		ctx.Export("identity:local_users:root:password", pulumi.String(localUsers.Root.Password))
 
-		y, err := yandex.ManageS3Helper(ctx)
-		if err != nil {
-			err = fmt.Errorf("error configure S3 Yandex service accounts: %w", err)
-			ctx.Log.Error(err.Error(), nil)
-			return err
-		}
+		if yandexCfg.Managed {
+			y, err := yandex.ManageS3Helper(ctx)
+			if err != nil {
+				err = fmt.Errorf("error configure S3 Yandex service accounts: %w", err)
+				ctx.Log.Error(err.Error(), nil)
+				return err
+			}
 
-		ctx.Export("identity:yandex:s3", pulumi.ToMap(y))
+			ctx.Export("identity:yandex:s3", pulumi.ToMap(y))
+		}
 
 		return nil
 	})

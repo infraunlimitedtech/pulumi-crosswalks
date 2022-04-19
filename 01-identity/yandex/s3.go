@@ -40,10 +40,10 @@ func ManageS3Helper(ctx *pulumi.Context) (map[string]interface{}, error) {
 	}
 
 	return map[string]interface{}{
-		"folder_id": s3Helper.FolderId,
+		"folder_id":  s3Helper.FolderId,
 		"account_id": s3Helper.ID(),
 		"access_key": s3Key.AccessKey,
 		"secret_key": s3Key.SecretKey,
-		"apikey": apiKey.SecretKey,
+		"apikey":     apiKey.SecretKey,
 	}, nil
 }

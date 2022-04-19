@@ -2,6 +2,8 @@ secretsprovider: hashivault://pulumi-infra-identity
 encryptedkey: dmF1bHQ6djE6aEFvaFhPRGxqUEoxOHBlaHhiSGlmY1lnSGhlQUNHclR0dUlPcFByMGY0QVJmVkNaNFJiN2hPbjZBSytITjh1bCswOU00U0kxck5LcGx0Nno=
 config:
   github:owner: infraunlimitedtech
+  identity:yandex:
+    managed: true
   identity:github:
     managed: true
   identity:local_users:

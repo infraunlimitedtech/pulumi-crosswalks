@@ -16,9 +16,9 @@ func (i *ComputeConfig) manage(ctx *pulumi.Context, cfg *HypervisorConfig) (map[
 	}
 
 	pool, err := libvirt.NewPool(ctx, fmt.Sprintf("%s-defaultPool", cfg.Name), &libvirt.PoolArgs{
-		Name: pulumi.String("infraunlimited"),
+		Name: pulumi.String(i.Storage.Name),
 		Type: pulumi.String("dir"),
-		Path: pulumi.String("/var/lib/libvirt/pools/infraunlimited"),
+		Path: pulumi.Sprintf("/var/lib/libvirt/pools/%s", i.Storage.Name),
 	}, pulumi.Provider(provider))
 	if err != nil {
 		return nil, err
@@ -51,8 +51,8 @@ func (i *ComputeConfig) manage(ctx *pulumi.Context, cfg *HypervisorConfig) (map[
 			return nil, err
 		}
 		base, err := libvirt.NewVolume(ctx, fmt.Sprintf("%s-%s-volume", cfg.Name, vm.ID), &libvirt.VolumeArgs{
-			Pool: pool.Name,
-			Name: pulumi.String(vm.ID),
+			Pool:   pool.Name,
+			Name:   pulumi.String(vm.ID),
 			Source: pulumi.String(i.Images.Base),
 		}, pulumi.Provider(provider), pulumi.Protect(false))
 		if err != nil {
@@ -74,8 +74,8 @@ func (i *ComputeConfig) manage(ctx *pulumi.Context, cfg *HypervisorConfig) (map[
 			},
 			NetworkInterfaces: &libvirt.DomainNetworkInterfaceArray{
 				&libvirt.DomainNetworkInterfaceArgs{
-					NetworkName: net.Name,
-					Hostname: pulumi.String(vm.ID),
+					NetworkName:  net.Name,
+					Hostname:     pulumi.String(vm.ID),
 					WaitForLease: pulumi.Bool(true),
 				},
 			},

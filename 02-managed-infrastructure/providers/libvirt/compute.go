@@ -8,8 +8,9 @@ import (
 )
 
 type ComputeConfig struct {
-	Images Images
-	Network Network
+	Images     Images
+	Network    Network
+	Storage    Storage
 	Hypevisors []*HypervisorConfig `json:"hypervisors"`
 }
 
@@ -17,15 +18,19 @@ type HypervisorConfig struct {
 	Name        string
 	URI         string
 	NetworkCIDR string `json:"networkcidr"`
-	Network HypervisorNetwork
+	Network     HypervisorNetwork
 	Machines    []*Machine
 }
 
 type Images struct {
-	Base string
+	Base       string
 	Combustion string
 }
 type Network struct {
+	Name string
+}
+
+type Storage struct {
 	Name string
 }
 

@@ -1,4 +1,6 @@
 config:
+  identity:yandex:
+    managed: true
   identity:github:
     managed: false
   identity:local_users:
