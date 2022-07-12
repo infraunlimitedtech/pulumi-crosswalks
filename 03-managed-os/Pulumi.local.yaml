@@ -11,7 +11,7 @@ config:
         wireguard:
           cidr: 192.168.77.0/24
         k3s:
-          version: v1.23.5+k3s1
+          version: v1.24.2+k3s2
           config:
             node-ip: 127.0.0.1
             node-label:
