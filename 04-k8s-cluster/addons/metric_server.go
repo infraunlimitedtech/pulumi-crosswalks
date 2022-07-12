@@ -8,7 +8,7 @@ import (
 func (a *Addons) RunMetricServer() error {
 	_, err := helmv3.NewChart(a.ctx, "metrics-server", helmv3.ChartArgs{
 		Chart:     pulumi.String("metrics-server"),
-		Version:   pulumi.String("v5.9.0"),
+		Version:   pulumi.String("v6.0.7"),
 		Namespace: pulumi.String(a.Namespace),
 		FetchArgs: helmv3.FetchArgs{
 			Repo: pulumi.String("https://charts.bitnami.com/bitnami"),
