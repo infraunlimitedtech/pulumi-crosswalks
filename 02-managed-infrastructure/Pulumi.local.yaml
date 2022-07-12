@@ -7,7 +7,6 @@ config:
         - id: k3s-agent01
         - id: k3s-agent02
         - id: k3s-agent03
-        - id: k3s-agent04
         name: kvm-local
         network:
           cidr: 192.168.99.144/28
