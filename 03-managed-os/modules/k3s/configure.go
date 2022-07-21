@@ -3,8 +3,8 @@ package k3s
 import (
 	"fmt"
 	"managed-os/config"
-	"managed-os/utils"
 	"managed-os/modules/wireguard"
+	"managed-os/utils"
 
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 	"github.com/spigell/pulumi-file/sdk/go/file"
@@ -16,7 +16,6 @@ var svcName = "k3s"
 func (c *Cluster) configure(wgPeers pulumi.AnyOutput, deps []map[string]pulumi.Resource) (map[string]pulumi.Resource, error) {
 	result := make(map[string]pulumi.Resource)
 
-
 	leaderDeployed, err := file.NewRemote(c.Ctx, fmt.Sprintf("%s-K3sCluster", c.Leader.ID), &file.RemoteArgs{
 		Connection: &file.ConnectionArgs{
 			Address:    pulumi.Sprintf("%s:22", utils.ExtractValueFromPulumiMapMap(c.InfraLayerNodeInfo, c.Leader.ID, "ip")),
@@ -24,8 +23,8 @@ func (c *Cluster) configure(wgPeers pulumi.AnyOutput, deps []map[string]pulumi.R
 			PrivateKey: utils.ExtractValueFromPulumiMapMap(c.InfraLayerNodeInfo, c.Leader.ID, "key"),
 		},
 		Hooks: &file.HooksArgs{
-			CommandAfterCreate: pulumi.Sprintf("sudo systemctl enable --now %s", svcName),
-			CommandAfterUpdate: pulumi.Sprintf("sudo systemctl restart %s", svcName),
+			CommandAfterCreate:  pulumi.Sprintf("sudo systemctl enable --now %s", svcName),
+			CommandAfterUpdate:  pulumi.Sprintf("sudo systemctl restart %s", svcName),
 			CommandAfterDestroy: pulumi.Sprintf("sudo systemctl disable --now %s", svcName),
 		},
 		UseSudo: pulumi.Bool(true),
@@ -39,7 +38,6 @@ func (c *Cluster) configure(wgPeers pulumi.AnyOutput, deps []map[string]pulumi.R
 	result[c.Leader.ID] = leaderDeployed
 
 	for _, node := range c.Followers {
-
 		if node.Role == "agent" {
 			svcName = "k3s-agent"
 		}
@@ -71,7 +69,7 @@ func (c *Cluster) configure(wgPeers pulumi.AnyOutput, deps []map[string]pulumi.R
 }
 
 func (c *Cluster) renderK3sCfg(node *config.Node, wgClusterInfo pulumi.AnyOutput) pulumi.StringOutput {
-return wgClusterInfo.ApplyT(func(v interface{}) string {
+	return wgClusterInfo.ApplyT(func(v interface{}) string {
 		parsed := v.([]wireguard.Peer)
 
 		peers := wireguard.ToPeers(parsed)
@@ -79,7 +77,7 @@ return wgClusterInfo.ApplyT(func(v interface{}) string {
 		node.Wireguard.IP = peers.Get(node.ID).PrivateAddr
 		leaderIP := peers.Get(c.Leader.ID).PrivateAddr
 
-                s := c.addCoreParams(node, leaderIP)
+		s := c.addCoreParams(node, leaderIP)
 
 		k3sRendered, _ := yaml.Marshal(&s)
 		return string(k3sRendered)

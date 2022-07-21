@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"managed-os/utils"
 
-	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 	"github.com/pulumi/pulumi-command/sdk/go/command/remote"
+	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 	"github.com/spigell/pulumi-file/sdk/go/file"
 )
 
@@ -27,6 +27,9 @@ func (o *Cluster) ConfigureSSHD(name string, cfg map[string]string) (map[string]
 			},
 			Create: pulumi.String("sudo rm -rfv /etc/ssh/sshd_config"),
 		})
+		if err != nil {
+			return nil, err
+		}
 
 		deployed, err := file.NewRemote(o.Ctx, fmt.Sprintf("%s-ConfigureSSHD-%s", node.ID, name), &file.RemoteArgs{
 			Connection: &file.ConnectionArgs{

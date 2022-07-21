@@ -53,9 +53,9 @@ type K3sConfig struct {
 }
 
 type Wireguard struct {
-	IP     string
+	IP              string
 	MgmtNode        bool             `json:"-"`
-	CIDR string `json:"cidr"`
+	CIDR            string           `json:"cidr"`
 	AdditionalPeers []AdditionalPeer `json:"additional_peers" yaml:"additional_peers"`
 }
 

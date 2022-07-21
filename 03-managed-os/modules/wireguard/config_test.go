@@ -38,7 +38,7 @@ var TestPeers = []Peer{
 
 func TestRenderConfig(t *testing.T) {
 	for _, peer := range TestPeers {
-		peersWithoutSelf := toPeers(TestPeers).without(peer.ID)
+		peersWithoutSelf := ToPeers(TestPeers).without(peer.ID)
 		for k, v := range peersWithoutSelf {
 			peersWithoutSelf[k].Endpoint = fmt.Sprintf("%s:%d", v.PublicAddr, ListenPort)
 		}

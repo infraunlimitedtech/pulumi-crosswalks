@@ -23,7 +23,7 @@ func (c *Cluster) grabKubeConfig(deps []map[string]pulumi.Resource) (*pulumi.Str
 		return nil, err
 	}
 
-	k := grabbed.Stdout.ApplyT(func (v interface{}) string {
+	k := grabbed.Stdout.ApplyT(func(v interface{}) string {
 		kubeconfig, err := clientcmd.Load([]byte(v.(string)))
 		if err != nil {
 			panic("Failed to parse kubeconfig")
@@ -38,9 +38,7 @@ func (c *Cluster) grabKubeConfig(deps []map[string]pulumi.Resource) (*pulumi.Str
 		w, _ := clientcmd.Write(*kubeconfig)
 
 		return string(w)
-
 	}).(pulumi.StringOutput)
 
 	return &k, nil
-//	return &grabbed.Stdout, nil
 }

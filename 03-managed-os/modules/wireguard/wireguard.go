@@ -2,14 +2,14 @@ package wireguard
 
 import (
 	"fmt"
-	"net"
 	"managed-os/config"
 	"managed-os/utils"
+	"net"
 
-	"inet.af/netaddr"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 	"github.com/spigell/pulumi-file/sdk/go/file"
 	"golang.zx2c4.com/wireguard/wgctrl/wgtypes"
+	"inet.af/netaddr"
 )
 
 const (
@@ -41,7 +41,7 @@ func (c *Cluster) Manage(deps []map[string]pulumi.Resource) (*CreatedCluster, er
 		ID: "mgmt",
 		Wireguard: config.Wireguard{
 			MgmtNode: true,
-			IP: "10.10.1.1",
+			IP:       "10.10.1.1",
 		},
 	})
 	wgPeers := buildWgPeers(c.Nodes, c.Info, c.InfraLayerNodeInfo)
@@ -51,7 +51,6 @@ func (c *Cluster) Manage(deps []map[string]pulumi.Resource) (*CreatedCluster, er
 	for _, node := range c.Nodes {
 		if node.Wireguard.MgmtNode {
 			done.MasterConfig = generateWgConfig(wgPeers, node)
-
 		} else {
 			deployed, err := file.NewRemote(c.Ctx, fmt.Sprintf("%s-WGCluster", node.ID), &file.RemoteArgs{
 				Connection: &file.ConnectionArgs{
@@ -102,7 +101,6 @@ func buildWgPeers(nodes []*config.Node, wgInfo pulumi.AnyOutput, infraNodesInfo 
 				k := info[node.ID].(map[string]interface{})
 				ip = k["ip"].(string)
 				m[node.ID] = netaddr.MustParseIP(ip)
-
 			}
 			if node.Wireguard.IP != "" {
 				ip = node.Wireguard.IP
@@ -111,7 +109,6 @@ func buildWgPeers(nodes []*config.Node, wgInfo pulumi.AnyOutput, infraNodesInfo 
 		}
 
 		for _, node := range nodes {
-
 			if info[node.ID] == nil {
 				generated, _ := wgtypes.GeneratePrivateKey()
 				key = generated.String()
@@ -125,12 +122,12 @@ func buildWgPeers(nodes []*config.Node, wgInfo pulumi.AnyOutput, infraNodesInfo 
 			if m[node.ID].IsZero() {
 				ipo, _, err := net.ParseCIDR(node.Wireguard.CIDR)
 				if err != nil {
-					panic(fmt.Sprintf("Can not parse CIDR for Wireguard! Is it a valid network? (%w)", err))
+					panic(fmt.Sprintf("Can not parse CIDR for Wireguard! Is it a valid network? (%s)", err.Error()))
 				}
 
 				start := netaddr.MustParseIP(ipo.String())
 				i := start.Next()
-				for ! free(m, i) {
+				for !free(m, i) {
 					i = i.Next()
 				}
 				m[node.ID] = i
@@ -155,47 +152,47 @@ func buildWgPeers(nodes []*config.Node, wgInfo pulumi.AnyOutput, infraNodesInfo 
 }
 
 func generateWgConfig(wgPeersOutput pulumi.AnyOutput, self *config.Node) pulumi.StringOutput {
-return pulumi.ToSecret(pulumi.Unsecret(pulumi.All(wgPeersOutput).ApplyT(func(args []interface{}) string {
-	wgPeers := args[0].([]Peer)
-	if len(self.Wireguard.AdditionalPeers) > 0 {
-		for _, p := range self.Wireguard.AdditionalPeers {
-			additionalPeer := Peer{
-				PublicKey:  p.PublicKey,
-				AllowedIps: p.AllowedIps,
+	return pulumi.ToSecret(pulumi.Unsecret(pulumi.All(wgPeersOutput).ApplyT(func(args []interface{}) string {
+		wgPeers := args[0].([]Peer)
+		if len(self.Wireguard.AdditionalPeers) > 0 {
+			for _, p := range self.Wireguard.AdditionalPeers {
+				additionalPeer := Peer{
+					PublicKey:  p.PublicKey,
+					AllowedIps: p.AllowedIps,
+				}
+				wgPeers = append(wgPeers, additionalPeer)
 			}
-			wgPeers = append(wgPeers, additionalPeer)
 		}
-	}
 
-	peersWithoutSelf := ToPeers(wgPeers).without(self.ID)
+		peersWithoutSelf := ToPeers(wgPeers).without(self.ID)
 
-	for k, v := range peersWithoutSelf {
-		peersWithoutSelf[k].PersistentKeepalive = 25
-		if len(peersWithoutSelf[k].AllowedIps) == 0 {
-			peersWithoutSelf[k].AllowedIps = []string{fmt.Sprintf("%s/32", v.PrivateAddr)}
+		for k, v := range peersWithoutSelf {
+			peersWithoutSelf[k].PersistentKeepalive = 25
+			if len(peersWithoutSelf[k].AllowedIps) == 0 {
+				peersWithoutSelf[k].AllowedIps = []string{fmt.Sprintf("%s/32", v.PrivateAddr)}
+			}
+			if v.PublicAddr != "" {
+				peersWithoutSelf[k].Endpoint = fmt.Sprintf("%s:%d", v.PublicAddr, listenPort)
+			}
 		}
-		if v.PublicAddr != "" {
-			peersWithoutSelf[k].Endpoint = fmt.Sprintf("%s:%d", v.PublicAddr, listenPort)
+
+		selfPeer := ToPeers(wgPeers).Get(self.ID)
+
+		config := &WgConfig{
+			Peer: peersWithoutSelf.getWgPeers(),
+			Interface: WgInterface{
+				Address:    selfPeer.PrivateAddr,
+				PrivateKey: selfPeer.PrivateKey,
+				ListenPort: listenPort,
+			},
 		}
-	}
 
-	selfPeer := ToPeers(wgPeers).Get(self.ID)
-
-	config := &WgConfig{
-		Peer: peersWithoutSelf.getWgPeers(),
-		Interface: WgInterface{
-			Address:    selfPeer.PrivateAddr,
-			PrivateKey: selfPeer.PrivateKey,
-			ListenPort: listenPort,
-		},
-	}
-
-	wgConfig, err := renderConfig(config)
-	if err != nil {
-		panic(fmt.Sprintf("Error while render Wireguard config %e", err))
-	}
-	return wgConfig
-}))).(pulumi.StringOutput)
+		wgConfig, err := renderConfig(config)
+		if err != nil {
+			panic(fmt.Sprintf("Error while render Wireguard config %e", err))
+		}
+		return wgConfig
+	}))).(pulumi.StringOutput)
 }
 
 func (w *CreatedCluster) ConvertPeersToMapMap() pulumi.StringMapMapOutput {
@@ -211,7 +208,7 @@ func (w *CreatedCluster) ConvertPeersToMapMap() pulumi.StringMapMapOutput {
 	}).(pulumi.StringMapMapOutput)
 }
 
-func free (m map[string]netaddr.IP, match netaddr.IP) bool {
+func free(m map[string]netaddr.IP, match netaddr.IP) bool {
 	for _, n := range m {
 		if n == match {
 			return false
