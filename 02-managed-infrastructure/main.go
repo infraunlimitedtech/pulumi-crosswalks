@@ -31,7 +31,7 @@ func main() {
 				return err
 			}
 		case "hetzner":
-			i, err = hetzner.ManageCompute(ctx)
+			i, err = hetzner.ManageCompute(ctx, sshCreds, cfg.Compute.Hetzner)
 			if err != nil {
 				return err
 			}

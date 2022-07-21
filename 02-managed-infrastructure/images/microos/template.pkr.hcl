@@ -8,7 +8,7 @@ source "hcloud" "main" {
     name    = "microos"
     version = "test"
   }
-  snapshot_name = "microos-amd64"
+  snapshot_name = "microos-amd64-07-06"
   ssh_username  = "root"
 }
 

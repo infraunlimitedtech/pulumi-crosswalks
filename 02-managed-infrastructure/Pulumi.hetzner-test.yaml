@@ -1,10 +1,47 @@
 config:
+  hcloud:token:
+    secure: AAABAFHwRXo/6icf72+9ucvC3dB8ZQMcx0Bnhac6GRpypn9YdX3N9HxPN9+gDw8nDdE0cuSsjgy1UDlE7/vZ4frZoAbxdWcJtaylfb/7RyibPSCw3slUn415Bp5k2HGL
+  managed-infrastructure:compute:
+    hetzner:
+      snapshots:
+        enabled: false
+        stack: spigell/managed-infrastructure-hetzner-snapshots/test
+        directory: hetzner-snapshots
+      configuration:
+        firewall:
+          rules:
+            - name: ping
+              enabled: true
+              protocol: icmp
+              allowed:
+                - '::/0'
+                - 0.0.0.0/0
+            - name: ssh
+              enabled: true
+              port: '22'
+              protocol: tcp
+              allowed:
+                - 212.58.119.211/32
+            - name: wireguard
+              enabled: true
+              port: '51822'
+              protocol: udp
+              allowed:
+                - '::/0'
+                - 0.0.0.0/0
+        servers:
+          defaults:
+#            image: snapshot
+            server_type: cpx11
+          machines:
+            - id: k3s-server01
+            - id: k3s-agent01
+              location: nbg1
+#            - id: k3s-agent02
   managed-infrastructure:main:
     identitystack: spigell/identity/local
     providers:
       compute: hetzner
       s3: yandex
-  managed-infrastructure:compute:
-    hetzner: {}
   managed-infrastructure:s3:
     yandex: {}
