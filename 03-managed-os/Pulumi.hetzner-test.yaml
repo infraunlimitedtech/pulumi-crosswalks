@@ -1,0 +1,50 @@
+config:
+  managed-os:main:
+    defaults:
+      agents:
+        k3s:
+          config:
+            kubelet-arg:
+            - node-status-update-frequency=20s
+            - system-reserved=cpu=100m,memory=100Mi
+      global:
+        wireguard:
+          cidr: 192.168.80.0/24
+        k3s:
+          version: v1.24.2+k3s2
+          config:
+            node-ip: 127.0.0.1
+            node-label:
+              - k3os.io/upgrade=disabled
+            token: token
+      servers:
+        k3s:
+          config:
+            cluster-cidr: 10.40.0.0/16
+            cluster-dns: 10.41.0.10
+            cluster-domain: hetzner-test.intra.infraunlimited.tech
+            disable:
+            - metrics-server
+            - traefik
+            - servicelb
+            disable-cloud-controller: true
+            kube-apiserver-arg:
+            - default-not-ready-toleration-seconds=60
+            - default-unreachable-toleration-seconds=60
+            kube-controller-manager-arg:
+            - node-monitor-grace-period=2m
+            kubelet-arg:
+            - node-status-update-frequency=20s
+            - system-reserved=cpu=1,memory=1Gi
+            node-taint:
+            - CriticalAddonsOnly=true:NoExecute
+            - node-role.kubernetes.io/control-plane:NoSchedule
+            service-cidr: 10.41.0.0/16
+    infra_stack: spigell/managed-infrastructure/hetzner-test
+    nodes:
+      servers:
+      - id: k3s-server01
+        leader: true
+      agents:
+      - id: k3s-agent01
+#      - id: k3s-agent02

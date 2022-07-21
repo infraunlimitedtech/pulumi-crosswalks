@@ -34,17 +34,17 @@ func GetRequirdSSHDConfig() map[string]string {
 func (c *Cluster) Manage(WgPeers pulumi.AnyOutput, deps []map[string]pulumi.Resource) (*CreatedCluster, error) {
 	installed, err := c.install(deps)
 	if err != nil {
-		return &CreatedCluster{}, err
+		return nil, err
 	}
 
 	configured, err := c.configure(WgPeers, []map[string]pulumi.Resource{installed})
 	if err != nil {
-		return &CreatedCluster{}, err
+		return nil, err
 	}
 
 	kubeConfig, err := c.grabKubeConfig([]map[string]pulumi.Resource{configured})
 	if err != nil {
-		return &CreatedCluster{}, err
+		return nil, err
 	}
 
 	return &CreatedCluster{
