@@ -1,3 +1,4 @@
+encryptionsalt: v1:UD116TTEitY=:v1:MjATse7gO7TVc2Cc:VrWgfOox0MoQU9rBnOtpks/BSbWWKQ==
 config:
   managed-infrastructure:compute:
     libvirt:
@@ -14,9 +15,9 @@ config:
       images:
         base: /home/spigell/projects/infra/infraUnlimited/pulumi-crosswalks/02-managed-infrastructure/images/microos/openSUSE-MicroOS.x86_64-kvm-and-xen.qcow2
         combustion: /home/spigell/projects/infra/infraUnlimited/pulumi-crosswalks/02-managed-infrastructure/images/microos/combustion.qcow2
-      storage:
-        name: infraunlimited
       network:
+        name: infraunlimited
+      storage:
         name: infraunlimited
   managed-infrastructure:main:
     identitystack: spigell/identity/local

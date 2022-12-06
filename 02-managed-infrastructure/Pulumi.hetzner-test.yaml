@@ -1,43 +1,42 @@
+encryptionsalt: v1:LCL9i7qgPT4=:v1:huPPsPga9CsQBna1:di2eBPEf+qD19bPmpSPufk3H62N23g==
 config:
   hcloud:token:
-    secure: AAABAFHwRXo/6icf72+9ucvC3dB8ZQMcx0Bnhac6GRpypn9YdX3N9HxPN9+gDw8nDdE0cuSsjgy1UDlE7/vZ4frZoAbxdWcJtaylfb/7RyibPSCw3slUn415Bp5k2HGL
+    secure: v1:32QfRs7jScNFSaO6:4qR/YPX+Q1eRpyGLo8XvhtSPajKtkfsaG9w8JGsZ0cl4xtrBFpYooeXIHdJH0+p+0HCv+WDIDxUz0RqjlDJHVpfwkTBuSvuyhTzk16puiDU=
   managed-infrastructure:compute:
     hetzner:
-      snapshots:
-        enabled: false
-        stack: spigell/managed-infrastructure-hetzner-snapshots/test
-        directory: hetzner-snapshots
       configuration:
         firewall:
           rules:
-            - name: ping
-              enabled: true
-              protocol: icmp
-              allowed:
-                - '::/0'
-                - 0.0.0.0/0
-            - name: ssh
-              enabled: true
-              port: '22'
-              protocol: tcp
-              allowed:
-                - 212.58.119.211/32
-            - name: wireguard
-              enabled: true
-              port: '51822'
-              protocol: udp
-              allowed:
-                - '::/0'
-                - 0.0.0.0/0
+          - allowed:
+            - ::/0
+            - 0.0.0.0/0
+            enabled: true
+            name: ping
+            protocol: icmp
+          - allowed:
+            - 212.58.119.211/32
+            enabled: true
+            name: ssh
+            port: "22"
+            protocol: tcp
+          - allowed:
+            - ::/0
+            - 0.0.0.0/0
+            enabled: true
+            name: wireguard
+            port: "51822"
+            protocol: udp
         servers:
           defaults:
-#            image: snapshot
             server_type: cpx11
           machines:
-            - id: k3s-server01
-            - id: k3s-agent01
-              location: nbg1
-#            - id: k3s-agent02
+          - id: k3s-server01
+          - id: k3s-agent01
+            location: nbg1
+      snapshots:
+        directory: hetzner-snapshots
+        enabled: false
+        stack: spigell/managed-infrastructure-hetzner-snapshots/test
   managed-infrastructure:main:
     identitystack: spigell/identity/local
     providers:
