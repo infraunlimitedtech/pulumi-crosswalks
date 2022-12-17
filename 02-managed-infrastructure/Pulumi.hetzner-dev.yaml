@@ -14,7 +14,7 @@ config:
             name: ping
             protocol: icmp
           - allowed:
-            - 212.58.119.211/32
+            - 0.0.0.0/0
             enabled: true
             name: ssh
             port: "22"
@@ -29,14 +29,11 @@ config:
         servers:
           defaults:
             server_type: cpx11
+            image: "automation-api"
           machines:
-          - id: k3s-server01
-          - id: k3s-agent01
-            location: nbg1
-      snapshots:
-        directory: hetzner-snapshots
-        enabled: false
-        stack: spigell/managed-infrastructure-hetzner-snapshots/test
+#          - id: k3s-server01
+#          - id: k3s-agent01
+#            location: nbg1
   managed-infrastructure:main:
     identitystack: spigell/identity/local
     providers:
