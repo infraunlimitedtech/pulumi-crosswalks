@@ -59,7 +59,7 @@ func (c *Cluster) Manage(deps []map[string]pulumi.Resource) (*CreatedCluster, er
 					PrivateKey: utils.ExtractValueFromPulumiMapMap(c.InfraLayerNodeInfo, node.ID, "key"),
 				},
 				Hooks: &file.HooksArgs{
-					CommandAfterCreate: pulumi.String("sudo systemctl enable --now wg-quick@kubewg0"),
+					CommandAfterCreate: pulumi.String("sudo systemctl enable wg-quick@kubewg0 && sudo systemctl restart wg-quick@kubewg0"),
 					CommandAfterUpdate: pulumi.String("sudo systemctl restart wg-quick@kubewg0"),
 				},
 				UseSudo: pulumi.Bool(true),
