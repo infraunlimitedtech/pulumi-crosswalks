@@ -5,9 +5,9 @@ import (
 )
 
 type CloudConfig struct {
-	Users []*UserCloudConfig
-	FQDN  string
-	GrowPart          *GrowPartConfig
+	Users    []*UserCloudConfig
+	FQDN     string
+	GrowPart *GrowPartConfig
 }
 
 type UserCloudConfig struct {
@@ -17,7 +17,7 @@ type UserCloudConfig struct {
 }
 
 type GrowPartConfig struct {
-	Devices            []string
+	Devices []string
 }
 
 func (c *CloudConfig) render() (string, error) {

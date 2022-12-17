@@ -17,7 +17,6 @@ require (
 	github.com/mattn/go-runewidth v0.0.13 // indirect
 	github.com/opentracing/basictracer-go v1.1.0 // indirect
 	github.com/opentracing/opentracing-go v1.2.0 // indirect
-	github.com/pulumi/pulumi-command/sdk v0.4.1
 	github.com/pulumi/pulumi-hcloud/sdk v1.8.0
 	github.com/pulumi/pulumi-libvirt/sdk v0.2.2
 	github.com/pulumi/pulumi-yandex/sdk v0.13.0
@@ -37,7 +36,6 @@ require (
 	golang.org/x/term v0.0.0-20220526004731-065cf7ba2467 // indirect
 	google.golang.org/genproto v0.0.0-20220715211116-798f69b842b9 // indirect
 	google.golang.org/grpc v1.48.0 // indirect
-	google.golang.org/protobuf v1.28.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0
 	pulumi-crosswalks v0.0.0-00010101000000-000000000000
 	sourcegraph.com/sourcegraph/appdash v0.0.0-20211028080628-e2786a622600 // indirect

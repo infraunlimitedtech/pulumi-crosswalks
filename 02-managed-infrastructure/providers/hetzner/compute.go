@@ -1,15 +1,19 @@
 package hetzner
 
 import (
-	"errors"
+	"context"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"managed-infrastructure/utils"
+	"net/http"
+	"net/url"
+	"os"
 	"strconv"
 	"strings"
 
 	"github.com/imdario/mergo"
 
-	"github.com/pulumi/pulumi-command/sdk/go/command/local"
 	"github.com/pulumi/pulumi-hcloud/sdk/go/hcloud"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
@@ -21,20 +25,10 @@ const (
 	defaultLocation   = "hel1"
 )
 
-var errSnapshotFeatureNotEnabled = errors.New("found magic word `snapshot` for image. But snapshot feature is not enabled")
-var errBadShapshotStack = errors.New("bad snapshot stack. Is it configured correctly?")
-
 type ComputeConfig struct {
 	Configuration *ConfigurationConfig
-	Snapshots     *SnapshotConfig
 
 	sshCreds pulumi.Output
-}
-
-type SnapshotConfig struct {
-	Enabled   bool
-	Stack     string
-	Directory string
 }
 
 type ConfigurationConfig struct {
@@ -70,6 +64,17 @@ type ComputedInfra struct {
 	nodes map[string]map[string]interface{}
 }
 
+type AutomationAPIResponce struct {
+	Body   Body `json:"body"`
+	Error  string
+	Status string
+	ID     string
+}
+
+type Body struct {
+	ID int
+}
+
 func ManageCompute(ctx *pulumi.Context, sshCreds pulumi.Output, cfg *ComputeConfig) (*ComputedInfra, error) {
 	nodes := make(map[string]map[string]interface{})
 	cfg.sshCreds = sshCreds
@@ -93,17 +98,7 @@ func ManageCompute(ctx *pulumi.Context, sshCreds pulumi.Output, cfg *ComputeConf
 func (i *ComputeConfig) manage(ctx *pulumi.Context) (map[string]map[string]interface{}, error) {
 	nodes := make(map[string]map[string]interface{})
 
-	deps := make([]pulumi.Resource, 0)
 	var fwRules pulumi.IntArray
-
-	var snapStack *pulumi.StackReference
-	var err error
-	if i.Snapshots.Enabled {
-		snapStack, err = pulumi.NewStackReference(ctx, i.Snapshots.Stack, nil)
-		if err != nil {
-			return nodes, err
-		}
-	}
 
 	if len(i.Configuration.Firewall.Rules) > 0 {
 		for _, rule := range i.Configuration.Firewall.Rules {
@@ -159,6 +154,7 @@ func (i *ComputeConfig) manage(ctx *pulumi.Context) (map[string]map[string]inter
 		args := &hcloud.ServerArgs{
 			ServerType: pulumi.String(srv.ServerType),
 			Location:   pulumi.String(srv.Location),
+			Name:       pulumi.String(srv.ID),
 			UserData: i.sshCreds.ApplyT(func(v interface{}) string {
 				m := v.(map[string]interface{})
 				userdata.Users = []*UserCloudConfig{
@@ -176,23 +172,55 @@ func (i *ComputeConfig) manage(ctx *pulumi.Context) (map[string]map[string]inter
 		}
 
 		switch image := srv.Image; image {
-		case "snapshot":
-			if !i.Snapshots.Enabled {
-				ctx.Log.Error(errSnapshotFeatureNotEnabled.Error(), nil)
-				return nodes, errSnapshotFeatureNotEnabled
+		case "automation-api":
+			var automationAPIResponce AutomationAPIResponce
+			url := url.URL{
+				Scheme:   "http",
+				Host:     os.Getenv("AUTOMATION_API_HTTP_ADDR"),
+				Path:     "hetzner/snapshots",
+				RawQuery: fmt.Sprintf("server=%s", srv.ID),
 			}
-			id := srv.ID
-			args.Image = snapStack.GetOutput(pulumi.String("nodes")).
-				ApplyT(func(v interface{}) string {
-					m, ok := v.(map[string]interface{})
-					if !ok {
-						panic(errBadShapshotStack)
-					}
-					return m[id].(string)
-				}).(pulumi.StringOutput)
+
+			req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, url.String(), nil)
+			if err != nil {
+				return nodes, err
+			}
+
+			cli := &http.Client{}
+
+			resp, err := cli.Do(req)
+			if err != nil {
+				return nodes, err
+			}
+
+			body, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				return nodes, err
+			}
+
+			err = json.Unmarshal(body, &automationAPIResponce)
+
+			if err != nil {
+				return nodes, err
+			}
+
+			switch resp.StatusCode {
+			case http.StatusOK:
+				args.Image = pulumi.String(strconv.Itoa(automationAPIResponce.Body.ID))
+
+			case http.StatusNotFound:
+				args.Image = pulumi.String(defaultImage)
+
+			default:
+				return nodes, fmt.Errorf("bad status code, error: %s", automationAPIResponce.Error)
+			}
+
+			resp.Body.Close()
+
 		case "":
 			args.Image = pulumi.String(defaultImage)
 			ctx.Log.Warn(fmt.Sprintf("Will use default image for %s", srv.ID), nil)
+
 		default:
 			args.Image = pulumi.String(image)
 		}
@@ -208,30 +236,6 @@ func (i *ComputeConfig) manage(ctx *pulumi.Context) (map[string]map[string]inter
 		nodes[srv.ID] = make(map[string]interface{})
 		nodes[srv.ID]["ip"] = created.Ipv4Address
 		nodes[srv.ID]["id"] = created.ID()
-
-		deps = append(deps, created)
-	}
-
-	if i.Snapshots.Enabled {
-		parsed := strings.Split(i.Snapshots.Stack, "/")
-		stack := parsed[len(parsed)-1]
-
-		cmd := pulumi.Sprintf("pulumi -s %s -C %s destroy -yf && pulumi -s %s -C %s up -yf",
-			stack, i.Snapshots.Directory,
-			stack, i.Snapshots.Directory,
-		)
-
-		_, err = local.NewCommand(ctx, "snapshotsWhileDestroy", &local.CommandArgs{
-			Environment: pulumi.StringMap{
-				"PULUMI_SKIP_UPDATE_CHECK": pulumi.String("true"),
-			},
-			Create: pulumi.String("echo 'Will create backup while destroy'"),
-			Delete: cmd,
-		}, pulumi.DependsOn(deps))
-
-		if err != nil {
-			return nil, err
-		}
 	}
 
 	return nodes, nil
