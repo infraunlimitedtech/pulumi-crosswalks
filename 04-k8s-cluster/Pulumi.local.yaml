@@ -10,7 +10,7 @@ config:
         publicKey: bHk2u/HZQg5gOzmFXkk7QTRngPQfCtFEUnGFDSMQrC8=
       privateKey:
         secure: AAABANecFG5q5Hk2Sg3tlvzIsnyuZLqbhwpPYpd4ipgpB72awOrWYYr/WJ3lUCTT1wyTBKGToGYcseRIFtp+BU3UEFHjto5o41jdUA==
-      version: 0.3.0
+      version: 0.5.0
     nginxIngress:
       replica: 1
       helm:
