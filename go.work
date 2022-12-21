@@ -3,5 +3,6 @@ go 1.19
 use (
 	./02-managed-infrastructure
 	./03-managed-os
+	./04-k8s-cluster
 	./automation-api
 )
