@@ -6,13 +6,14 @@ require (
 	github.com/BurntSushi/toml v1.2.1
 	github.com/imdario/mergo v0.3.13
 	github.com/pulumi/pulumi-command/sdk v0.7.0
-	github.com/pulumi/pulumi/sdk/v3 v3.49.0
+	github.com/pulumi/pulumi/sdk/v3 v3.50.1
 	github.com/spigell/pulumi-file/sdk v0.0.0-20220328220825-472428d2995c
 	github.com/stretchr/testify v1.8.0
 	golang.zx2c4.com/wireguard/wgctrl v0.0.0-20221104135756-97bc4ad4a1cb
 	gopkg.in/yaml.v3 v3.0.1
 	inet.af/netaddr v0.0.0-20220811202034-502d2d690317
 	k8s.io/client-go v0.26.0
+	pulumi-crosswalks v0.0.0-00010101000000-000000000000
 )
 
 require (
@@ -23,7 +24,7 @@ require (
 	github.com/aead/chacha20 v0.0.0-20180709150244-8b13a72661da // indirect
 	github.com/blang/semver v3.5.1+incompatible // indirect
 	github.com/cheggaaa/pb v1.0.29 // indirect
-	github.com/cloudflare/circl v1.3.0 // indirect
+	github.com/cloudflare/circl v1.3.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/djherbis/times v1.5.0 // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect
@@ -55,6 +56,7 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pkg/term v1.1.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/pulumi/pulumi-hcloud/sdk v1.10.1 // indirect
 	github.com/rivo/uniseg v0.4.3 // indirect
 	github.com/rogpeppe/go-internal v1.9.0 // indirect
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06 // indirect
@@ -97,3 +99,5 @@ require (
 	sigs.k8s.io/yaml v1.3.0 // indirect
 	sourcegraph.com/sourcegraph/appdash v0.0.0-20211028080628-e2786a622600 // indirect
 )
+
+replace pulumi-crosswalks => ../
