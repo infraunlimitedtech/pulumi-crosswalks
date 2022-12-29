@@ -3,6 +3,10 @@ package addons
 import (
 	"fmt"
 	"path/filepath"
+	"pulumi-crosswalks/utils"
+	"pulumi-crosswalks/utils/hetzner"
+	"pulumi-crosswalks/utils/firewalld"
+	"strconv"
 
 	kilov1 "k8s-cluster/crds/generated/squat/kilo/v1alpha1"
 
@@ -14,10 +18,35 @@ import (
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
 
-func (a *Addons) RunKilo() error {
-	serviceName := "kilo"
-	vpnPort := 51821
+const (
+	vpnPort     = 31200
+	serviceName = "kilo"
+)
 
+var (
+	hetznerFirewallRules = []hetzner.Rule{
+		{
+			Direction: "in",
+			Protocol:  "udp",
+			Port:      strconv.Itoa(vpnPort),
+			SourceIps: []string{"0.0.0.0/0"},
+		},
+  }
+	firewalldFirewallRules = []firewalld.Rule{
+		{
+			Direction: "in",
+			Protocol:  "udp",
+			Port:      strconv.Itoa(vpnPort),
+			SourceIps: []string{"0.0.0.0/0"},
+		},
+	}
+)
+
+type StartedKilo struct {
+	Firewalls *Firewalls
+}
+
+func (a *Addons) RunKilo() (*StartedKilo, error) {
 	serviceAccount, err := corev1.NewServiceAccount(a.ctx, "kiloServiceAccount", &corev1.ServiceAccountArgs{
 		ApiVersion: pulumi.String("v1"),
 		Kind:       pulumi.String("ServiceAccount"),
@@ -27,7 +56,7 @@ func (a *Addons) RunKilo() error {
 		},
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	clusterRole, err := rbacv1.NewClusterRole(a.ctx, "kiloClusterRole", &rbacv1.ClusterRoleArgs{
@@ -77,7 +106,7 @@ func (a *Addons) RunKilo() error {
 		},
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	_, err = rbacv1.NewClusterRoleBinding(a.ctx, "kiloClusterRoleBinding", &rbacv1.ClusterRoleBindingArgs{
@@ -101,7 +130,7 @@ func (a *Addons) RunKilo() error {
 		},
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	_, err = corev1.NewConfigMap(a.ctx, "kiloScripts", &corev1.ConfigMapArgs{
@@ -138,7 +167,7 @@ cp secrets/* /var/lib/kilo/`),
 	})
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	privateKey, err := corev1.NewSecret(a.ctx, "kiloPrivateKey", &corev1.SecretArgs{
@@ -152,7 +181,7 @@ cp secrets/* /var/lib/kilo/`),
 		},
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	_, err = appsv1.NewDeployment(a.ctx, "kiloDeployment", &appsv1.DeploymentArgs{
@@ -167,6 +196,9 @@ cp secrets/* /var/lib/kilo/`),
 			},
 		},
 		Spec: &appsv1.DeploymentSpecArgs{
+			Strategy: &appsv1.DeploymentStrategyArgs{
+				Type: pulumi.String("Recreate"),
+			},
 			Replicas: pulumi.Int(1),
 			Selector: &metav1.LabelSelectorArgs{
 				MatchLabels: pulumi.StringMap{
@@ -196,7 +228,7 @@ cp secrets/* /var/lib/kilo/`),
 						"node-role.kubernetes.io/master": pulumi.String("true"),
 					},
 					ServiceAccountName: serviceAccount.Metadata.Name().Elem(),
-					HostNetwork:        pulumi.Bool(true),
+					HostNetwork:        pulumi.Bool(false),
 					Containers: corev1.ContainerArray{
 						&corev1.ContainerArgs{
 							Name:  pulumi.String("kilo"),
@@ -205,7 +237,7 @@ cp secrets/* /var/lib/kilo/`),
 								pulumi.String("--kubeconfig=/etc/kubernetes/kubeconfig"),
 								pulumi.String(fmt.Sprintf("%v%v%v", "--hostname=", "$", "(NODE_NAME)")),
 								pulumi.String("--cni=false"),
-								pulumi.String("--log-level=warn"),
+								pulumi.String("--log-level=debug"),
 								pulumi.String(fmt.Sprintf("--port=%d", vpnPort)),
 								pulumi.String("--compatibility=flannel"),
 								pulumi.String("--local=false"),
@@ -360,7 +392,7 @@ cp secrets/* /var/lib/kilo/`),
 		},
 	}, pulumi.DeleteBeforeReplace(true))
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	_, err = corev1.NewService(a.ctx, "kiloVpnService", &corev1.ServiceArgs{
@@ -371,7 +403,7 @@ cp secrets/* /var/lib/kilo/`),
 			Namespace: pulumi.String(a.Namespace),
 		},
 		Spec: &corev1.ServiceSpecArgs{
-			Type: pulumi.String("ClusterIP"),
+			Type: pulumi.String("NodePort"),
 			Selector: pulumi.StringMap{
 				"app.kubernetes.io/name":    pulumi.String("kilo"),
 				"app.kubernetes.io/part-of": pulumi.String("kilo"),
@@ -381,12 +413,13 @@ cp secrets/* /var/lib/kilo/`),
 					Name:     pulumi.String("vpn"),
 					Protocol: pulumi.String("UDP"),
 					Port:     pulumi.Int(vpnPort),
+					NodePort: pulumi.Int(vpnPort),
 				},
 			},
 		},
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	_, err = yaml.NewConfigGroup(a.ctx, "kiloCrds", &yaml.ConfigGroupArgs{
@@ -394,7 +427,7 @@ cp secrets/* /var/lib/kilo/`),
 	})
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	for _, peer := range a.Kilo.Peers {
@@ -410,9 +443,29 @@ cp secrets/* /var/lib/kilo/`),
 			},
 		})
 		if err != nil {
-			return err
+			return nil, err
 		}
 	}
 
-	return nil
+	return &StartedKilo{
+		Firewalls: a.Kilo.Firewalls,
+	}, nil
+}
+
+func (k *StartedKilo) GetRequiredFirewallRules() []utils.FirewallRule {
+	rules := make([]utils.FirewallRule, len(hetznerFirewallRules)+len(firewalldFirewallRules))
+	if k.Firewalls.Hetzner.Managed {
+		for i, hrule := range hetznerFirewallRules {
+			rules[i] = hrule
+		}
+	}
+
+	if k.Firewalls.Firewalld.Managed {
+		p := len(rules) - 1
+		for i, frule := range firewalldFirewallRules {
+			rules[p+i] = frule
+		}
+	}
+
+	return rules
 }

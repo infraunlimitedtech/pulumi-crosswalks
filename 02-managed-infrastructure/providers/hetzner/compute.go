@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"pulumi-crosswalks/utils/hetzner"
 	"strconv"
 	"strings"
 
@@ -20,6 +21,7 @@ import (
 
 const (
 	// Base snapshot for microOs.
+	provider          = "hetzner"
 	defaultImage      = "75477320"
 	defaultServerType = "cpx11"
 	defaultLocation   = "hel1"
@@ -27,25 +29,12 @@ const (
 
 type ComputeConfig struct {
 	Configuration *ConfigurationConfig
-
-	sshCreds pulumi.Output
+	sshCreds      pulumi.Output
 }
 
 type ConfigurationConfig struct {
-	Firewall *FirewallConfig
+	Firewall []hetzner.Firewall
 	Servers  *ServersConfig
-}
-
-type FirewallConfig struct {
-	Rules []*FirewallRule
-}
-
-type FirewallRule struct {
-	Enabled  bool
-	Name     string
-	Port     string
-	Protocol string
-	Allowed  []string
 }
 
 type ServersConfig struct {
@@ -100,28 +89,14 @@ func (i *ComputeConfig) manage(ctx *pulumi.Context) (map[string]map[string]inter
 
 	var fwRules pulumi.IntArray
 
-	if len(i.Configuration.Firewall.Rules) > 0 {
-		for _, rule := range i.Configuration.Firewall.Rules {
-			args := &hcloud.FirewallRuleArgs{
-				Direction: pulumi.String("in"),
-				Protocol:  pulumi.String(rule.Protocol),
-				SourceIps: pulumi.ToStringArray(rule.Allowed),
-			}
-			if rule.Port != "" {
-				args.Port = pulumi.String(rule.Port)
-			}
+	if len(i.Configuration.Firewall) > 0 {
+		firewalls, err := hetzner.NewFirewalls(ctx, i.Configuration.Firewall)
+		if err != nil {
+			return nodes, err
+		}
 
-			fwRule, err := hcloud.NewFirewall(ctx, rule.Name, &hcloud.FirewallArgs{
-				Name: pulumi.String(rule.Name),
-				Rules: hcloud.FirewallRuleArray{
-					args,
-				},
-			})
-			if err != nil {
-				return nodes, err
-			}
-
-			conv := fwRule.ID().ToStringOutput().ApplyT(func(id string) (int, error) {
+		for _, fw := range firewalls.Items {
+			conv := fw.GetID().ToStringOutput().ApplyT(func(id string) (int, error) {
 				return strconv.Atoi(strings.Split(id, "-")[0])
 			}).(pulumi.IntOutput)
 
@@ -234,6 +209,7 @@ func (i *ComputeConfig) manage(ctx *pulumi.Context) (map[string]map[string]inter
 			return nodes, err
 		}
 		nodes[srv.ID] = make(map[string]interface{})
+		nodes[srv.ID]["provider"] = provider
 		nodes[srv.ID]["ip"] = created.Ipv4Address
 		nodes[srv.ID]["id"] = created.ID()
 	}

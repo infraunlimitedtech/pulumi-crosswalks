@@ -1,5 +1,7 @@
 package config
 
+import "pulumi-crosswalks/utils/hetzner"
+
 type PulumiConfig struct {
 	InfraStack string `json:"infra_stack"`
 	Defaults   *Defaults
@@ -21,6 +23,7 @@ type Node struct {
 	ID        string
 	Leader    bool
 	Wireguard Wireguard
+	Firewall  Firewall
 	K3s       K3s
 	Role      string
 }
@@ -62,4 +65,8 @@ type Wireguard struct {
 type AdditionalPeer struct {
 	AllowedIps []string `json:"allowed_ips" yaml:"allowed_ips"`
 	PublicKey  string
+}
+
+type Firewall struct {
+	Hetzner []hetzner.Firewall
 }

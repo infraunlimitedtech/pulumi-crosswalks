@@ -29,10 +29,10 @@ func (a *Addons) RunMetricServer() error {
 			},
 			"resources": pulumi.Map{
 				"requests": pulumi.Map{
-					"memory": pulumi.String("16Mi"),
+					"memory": pulumi.String("48Mi"),
 				},
 				"limits": pulumi.Map{
-					"memory": pulumi.String("32Mi"),
+					"memory": pulumi.String("96Mi"),
 				},
 			},
 			"apiService": pulumi.Map{

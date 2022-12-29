@@ -84,6 +84,12 @@ func main() {
 			return err
 		}
 
+		err = cluster.Firewalls.Manage()
+		if err != nil {
+			ctx.Log.Error(err.Error(), nil)
+			return err
+		}
+
 		ctx.Export("os:wireguard:info", wgCluster.ConvertPeersToMapMap())
 		ctx.Export("os:wireguard:config", pulumi.ToSecret(wgCluster.MasterConfig))
 

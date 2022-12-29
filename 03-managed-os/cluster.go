@@ -2,6 +2,7 @@ package main
 
 import (
 	"managed-os/config"
+	"managed-os/modules/firewall"
 	"managed-os/modules/k3s"
 	"managed-os/modules/microos"
 	"managed-os/modules/wireguard"
@@ -21,6 +22,7 @@ type cluster struct {
 type definedCluster struct {
 	Os        *microos.Cluster
 	K3s       *k3s.Cluster
+	Firewalls *firewall.FirewallCfg
 	Wireguard *wireguard.Cluster
 }
 
@@ -53,6 +55,7 @@ func defineCluster(c *cluster) (*definedCluster, error) {
 		}
 	}
 
+	// WHY append ?!
 	if err := config.Validate(append(followers, leader), c.InfraLayerNodeInfo); err != nil {
 		return nil, err
 	}
@@ -80,6 +83,11 @@ func defineCluster(c *cluster) (*definedCluster, error) {
 			InfraLayerNodeInfo: c.InfraLayerNodeInfo,
 			Iface:              c.InternalIface,
 			Followers:          followers,
+		},
+		Firewalls: &firewall.FirewallCfg{
+			Ctx:                c.ctx,
+			InfraLayerNodeInfo: c.InfraLayerNodeInfo,
+			Nodes:              allNodes,
 		},
 	}, nil
 }

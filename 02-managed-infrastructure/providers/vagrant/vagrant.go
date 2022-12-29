@@ -43,9 +43,11 @@ func Init(sshCreds pulumi.Output) *Infra {
 
 	for _, node := range vagrantNodes {
 		nodes[node["id"]] = map[string]interface{}{
-			"key":  utils.ExtractFromExportedMap(sshCreds, "privatekey"),
-			"user": utils.ExtractFromExportedMap(sshCreds, "user"),
-			"ip":   node["ip"],
+			"id":       node["id"],
+			"provider": "vagrant",
+			"key":      utils.ExtractFromExportedMap(sshCreds, "privatekey"),
+			"user":     utils.ExtractFromExportedMap(sshCreds, "user"),
+			"ip":       node["ip"],
 		}
 	}
 	return &Infra{

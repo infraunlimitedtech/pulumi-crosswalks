@@ -1,0 +1,10 @@
+config:
+  managed-infrastructure:main:
+    identitystack: spigell/identity/local
+    providers:
+      compute: vagrant
+      s3: yandex
+  managed-infrastructure:compute:
+    vagrant: {}
+  managed-infrastructure:s3:
+    yandex: {}

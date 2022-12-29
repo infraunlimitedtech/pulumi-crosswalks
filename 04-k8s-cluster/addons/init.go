@@ -51,6 +51,7 @@ type Kilo struct {
 	Crds        *CRDS
 	Version     string
 	Peers       []KiloPeer
+	Firewalls   *Firewalls
 	ExternalIPs []string
 }
 
@@ -66,6 +67,15 @@ type HelmParams struct {
 
 type CRDS struct {
 	Path string
+}
+
+type Firewalls struct {
+	Hetzner   *Firewall
+	Firewalld *Firewall
+}
+
+type Firewall struct {
+	Managed bool
 }
 
 func Init(ctx *pulumi.Context, s *spec.ClusterSpec) (*Addons, error) {
