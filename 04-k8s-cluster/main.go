@@ -2,6 +2,7 @@ package main
 
 import (
 	"k8s-cluster/addons"
+	"k8s-cluster/infra/firewall"
 	"k8s-cluster/rbac"
 	"k8s-cluster/spec"
 
@@ -10,6 +11,15 @@ import (
 
 func main() {
 	pulumi.Run(func(ctx *pulumi.Context) error {
+		mainCfg := getMainCfg(ctx)
+
+		infraStack, err := pulumi.NewStackReference(ctx, mainCfg.InfraStack, nil)
+		if err != nil {
+			return err
+		}
+
+		infraLayerNodeInfo := infraStack.GetOutput(pulumi.String("infra:nodes:info"))
+
 		kubeClusterSpec, err := spec.Init(ctx)
 		if err != nil {
 			return err
@@ -31,6 +41,11 @@ func main() {
 			return err
 		}
 
-		return kubeClusterAddons.RunKilo()
+		kilo, err := kubeClusterAddons.RunKilo()
+		if err != nil {
+			return err
+		}
+
+		return firewall.Manage(ctx, infraLayerNodeInfo, kilo.GetRequiredFirewallRules())
 	})
 }

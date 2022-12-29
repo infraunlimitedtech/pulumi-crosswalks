@@ -1,21 +1,35 @@
 config:
+  hcloud:token:
+    secure: AAABADKXJLLh8L2IER+NuI9RlaHvZik6K2lMfIhXa2SoPMulTByjHX+ynoyFza9PNCc1TERtr/QR01v0CJO3cibePmOdni3CudFnbcwnRGYNhQRzfwV6WefjdQDWDl6g
   k8s-cluster:addons:
     kilo:
       crds:
         path: crds/sources/squat/kilo
+      firewalls:
+        firewalld:
+          managed: true
+        hetzner:
+          managed: true
       peers:
       - allowedIPs:
-        - 10.5.0.1/32
+        - 10.4.10.1/32
         name: spigell
         publicKey: bHk2u/HZQg5gOzmFXkk7QTRngPQfCtFEUnGFDSMQrC8=
+      - allowedIPs:
+        - 10.4.10.2/32
+        - 10.41.196.163/32
+        name: spigell-for-all
+        publicKey: DJNFqDV+zuBk0W3F03JsujYdRRc9hk8g2mm+PNj7jXU=
       privateKey:
         secure: AAABANecFG5q5Hk2Sg3tlvzIsnyuZLqbhwpPYpd4ipgpB72awOrWYYr/WJ3lUCTT1wyTBKGToGYcseRIFtp+BU3UEFHjto5o41jdUA==
       version: 0.5.0
     nginxIngress:
-      replica: 1
       helm:
         version: 0.12.1
       kubeapi:
         clusterIp: 10.41.1.1
+      replica: 1
+  k8s-cluster:main:
+    infraStack: spigell/managed-infrastructure/hetzner-dev
   k8s-cluster:spec:
     internalDomainZone: local.intra.infraunlimited.tech

@@ -8,7 +8,10 @@ import (
 
 func ExtractValueFromPulumiMapMap(m pulumi.AnyOutput, mapKey, valueKey string) pulumi.StringOutput {
 	return m.ApplyT(func(v interface{}) string {
-		d := v.(map[string]interface{})
+		d, ok := v.(map[string]interface{})
+		if !ok {
+			panic(fmt.Sprintf("There is no map with key `%s`", mapKey))
+		}
 		e, ok := d[mapKey].(map[string]interface{})
 		if !ok {
 			panic(fmt.Sprintf("Can't find values for mapKey `%s`. Is it contains in parent map?", mapKey))
