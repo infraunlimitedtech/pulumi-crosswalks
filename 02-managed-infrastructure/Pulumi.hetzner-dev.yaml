@@ -24,9 +24,9 @@ config:
             server_type: cpx11
             image: 'automation-api'
           machines:
-          - id: k3s-server01
-          - id: k3s-agent01
-            location: nbg1
+#          - id: k3s-server01
+#          - id: k3s-agent01
+#            location: nbg1
   managed-infrastructure:main:
     identitystack: spigell/identity/local
     providers:

@@ -40,7 +40,7 @@ config:
             node-taint:
               - CriticalAddonsOnly=true:NoExecute
               - node-role.kubernetes.io/control-plane:NoSchedule
-    infra_stack: spigell/managed-infrastructure/local
+    infra_stack: spigell/managed-infrastructure/vagrant
     nodes:
       servers:
       - id: k3s-server01
