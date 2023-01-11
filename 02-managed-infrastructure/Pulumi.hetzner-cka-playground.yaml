@@ -1,0 +1,36 @@
+config:
+  hcloud:token:
+    secure: AAABABvcLfFgeBokHw64Dg8Cps9xVNJ+SetdupcZV1iLdgtmqMmElGIPzB+sibcsbes8c4CsusSJ760JruWHwDelRWJsR4exkeFS1YO4msEaoGCk75gDLwSsqOIkRkqx
+  managed-infrastructure:compute:
+    hetzner:
+      configuration:
+        firewall:
+        - name: cka-playground-managed-infra
+          rules:
+          - description: ping
+            protocol: icmp
+            sourceIps:
+            - ::/0
+            - 0.0.0.0/0
+          - description: ssh from anywhere
+            port: "22"
+            protocol: tcp
+            sourceIps:
+            - ::/0
+            - 0.0.0.0/0
+        servers:
+          defaults:
+            image: automation-api
+            server_type: cpx11
+          machines:
+#          - id: k3s-cka-server01
+#          - id: k3s-cka-agent01
+#            location: nbg1
+#          - id: k3s-cka-agent02
+  managed-infrastructure:main:
+    identitystack: spigell/identity/local
+    providers:
+      compute: hetzner
+      s3: yandex
+  managed-infrastructure:s3:
+    yandex: {}
