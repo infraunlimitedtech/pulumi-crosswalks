@@ -18,7 +18,6 @@ var (
 func Manage(ctx *pulumi.Context, nodes pulumi.AnyOutput, rules []utils.FirewallRule) error {
 	hrules := make([]hetzner.Rule, 0)
 	for _, rule := range rules {
-		rule.Type()
 		switch v := rule.(type) {
 		case hetzner.Rule:
 			hrules = append(hrules, v)
