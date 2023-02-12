@@ -2,84 +2,41 @@
 # vi: set ft=ruby :
 #
 
-def configure_eth1(node, ip)
-  node.vm.provision 'shell',
-    upload_path: '/home/rancher/vagrant-shell',
-    inline: "sudo bash -c 'echo PrivateIP=#{ip} > /var/lib/rancher/k3os/infra-env' &&\
-             sudo ip l set up eth1 && . /var/lib/rancher/k3os/infra-env &&\
-             sudo ip a add ${PrivateIP}/24 dev eth1"
-end
-
-def configure_vb(node)
-  node.vm.provider 'virtualbox' do |vb|
-    vb.customize ['modifyvm', :id, '--nic2', 'hostonly']
-    vb.customize ['modifyvm', :id, '--hostonlyadapter2', 'vboxnet0']
-
-    vb.customize ['modifyvm', :id, '--natdnshostresolver1', 'off']
-    vb.customize ['modifyvm', :id, '--natdnsproxy1', 'on']
-
-    vb.customize ['modifyvm', :id, '--acpi', 'off']
-    vb.memory = '2048'
-    vb.cpus = 2
-  end
-end
-
-
-
 Vagrant.configure('2') do |config|
-  config.vm.box = 'k3os-local.box'
+  config.vm.box = 'opensuse/MicroOS.x86_64'
+  config.vm.box_version = '16.0.0.20230210'
   config.vm.guest = :linux
 
   config.ssh.forward_agent = true
   config.vm.network 'forwarded_port', guest: 22, host: 2222, disabled: true
   config.vm.synced_folder '.', '/vagrant', disabled: true
 
-  
+  config.vm.provision "shell" do |s|
+    s.args = `pulumi stack output identity:ssh:server_access:credentials  -s spigell/identity/vagrant -j  | jq -r .publickey`
+    s.inline = <<-SHELL
+      echo ${@} >> /home/vagrant/.ssh/authorized_keys
+    SHELL
+  end
+
+  config.vm.provision "shell" do |hack|
+    hack.inline = <<-SHELL
+      touch /etc/sysconfig/network/dhcp
+    SHELL
+  end
+
   config.vm.define 'k3s-server01' do |server01|
-    server01.vm.provider 'virtualbox' do |vb|
-      vb.customize ['modifyvm', :id, '--macaddress2', 'E427FFFFEEEE']
+    server01.vm.hostname = 'k3s-server01'
+    server01.vm.provider :libvirt do |domain|
+      domain.memory = 2048
+      domain.cpus = 2
     end
-    configure_vb(server01)
-    configure_eth1(server01, '192.168.99.135')
-  end
-
-  config.vm.define 'k3s-server02' do |server02|
-    server02.vm.provider 'virtualbox' do |vb|
-      vb.customize ['modifyvm', :id, '--macaddress2', 'E427FFFFEEE1']
-    end
-    configure_vb(server02)
-    configure_eth1(server02, '192.168.99.136')
-  end
-
-  config.vm.define 'k3s-server03' do |server03|
-    server03.vm.provider 'virtualbox' do |vb|
-      vb.customize ['modifyvm', :id, '--macaddress2', 'E427FFFFEEE2']
-    end
-    configure_vb(server03)
-    configure_eth1(server03, '192.168.99.137')
   end
 
   config.vm.define 'k3s-agent01' do |agent01|
-    agent01.vm.provider 'virtualbox' do |vb|
-      vb.customize ['modifyvm', :id, '--macaddress2', 'E427FFFFEEE3']
+    agent01.vm.hostname = 'k3s-agent01'
+    agent01.vm.provider :libvirt do |domain|
+      domain.memory = 1024
+      domain.cpus = 1
     end
-    configure_vb(agent01)
-    configure_eth1(agent01, '192.168.99.140')
-  end
-
-  config.vm.define 'k3s-agent02' do |agent02|
-    agent02.vm.provider 'virtualbox' do |vb|
-      vb.customize ['modifyvm', :id, '--macaddress2', 'E427FFFFEEE4']
-    end
-    configure_vb(agent02)
-    configure_eth1(agent02, '192.168.99.141')
-  end
-
-  config.vm.define 'k3s-agent03' do |agent03|
-    agent03.vm.provider 'virtualbox' do |vb|
-      vb.customize ['modifyvm', :id, '--macaddress2', 'E427FFFFEEE5']
-    end
-    configure_vb(agent03)
-    configure_eth1(agent03, '192.168.99.142')
   end
 end

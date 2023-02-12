@@ -53,6 +53,7 @@ config:
             - node-role.kubernetes.io/control-plane:NoSchedule
             service-cidr: 10.41.0.0/16
     infra_stack: spigell/managed-infrastructure/hetzner-dev
+    id_stack: spigell/identity/local
     nodes:
       agents:
       - id: k3s-agent01

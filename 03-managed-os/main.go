@@ -19,7 +19,7 @@ func main() {
 			return err
 		}
 
-		idStack, err := pulumi.NewStackReference(ctx, "spigell/identity/local", nil)
+		idStack, err := pulumi.NewStackReference(ctx, pulumiCfg.IDStack, nil)
 		if err != nil {
 			return err
 		}

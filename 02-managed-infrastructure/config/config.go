@@ -1,6 +1,7 @@
 package config
 
 import (
+	"managed-infrastructure/providers/external"
 	"managed-infrastructure/providers/hetzner"
 	"managed-infrastructure/providers/libvirt"
 	"managed-infrastructure/providers/yandex"
@@ -24,8 +25,9 @@ type S3Config struct {
 }
 
 type ComputeConfig struct {
-	Libvirt *libvirt.ComputeConfig
-	Hetzner *hetzner.ComputeConfig
+	Libvirt  *libvirt.ComputeConfig
+	Hetzner  *hetzner.ComputeConfig
+	External *external.ComputeConfig
 }
 
 type GatheredConfig struct {
