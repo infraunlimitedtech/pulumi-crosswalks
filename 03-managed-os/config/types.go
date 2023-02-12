@@ -4,6 +4,7 @@ import "pulumi-crosswalks/utils/hetzner"
 
 type PulumiConfig struct {
 	InfraStack string `json:"infra_stack"`
+	IDStack    string `json:"id_stack"`
 	Defaults   *Defaults
 	Nodes      *Nodes
 }

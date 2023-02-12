@@ -3,9 +3,9 @@ package main
 import (
 	"managed-infrastructure/config"
 	"managed-infrastructure/infra"
+	"managed-infrastructure/providers/external"
 	"managed-infrastructure/providers/hetzner"
 	"managed-infrastructure/providers/libvirt"
-	"managed-infrastructure/providers/vagrant"
 	"managed-infrastructure/providers/yandex"
 
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
@@ -35,9 +35,8 @@ func main() {
 			if err != nil {
 				return err
 			}
-		case "vagrant":
-			ctx.Log.Warn("Vagrant stack is not implemented yet. Controlled via Vagrant", nil)
-			i = vagrant.Init(sshCreds)
+		case "external":
+			i = external.Init(sshCreds, cfg.Compute.External)
 		default:
 			ctx.Log.Error("Unknown compute provider", nil)
 			return nil

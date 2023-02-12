@@ -41,6 +41,7 @@ config:
               - CriticalAddonsOnly=true:NoExecute
               - node-role.kubernetes.io/control-plane:NoSchedule
     infra_stack: spigell/managed-infrastructure/vagrant
+    id_stack: spigell/identity/local
     nodes:
       servers:
       - id: k3s-server01

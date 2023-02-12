@@ -1,10 +1,13 @@
 config:
-  managed-infrastructure:main:
-    identitystack: spigell/identity/local
-    providers:
-      compute: vagrant
-      s3: yandex
   managed-infrastructure:compute:
-    vagrant: {}
-  managed-infrastructure:s3:
-    yandex: {}
+    external:
+    - id: k3s-agent01
+      ip: 192.168.121.151
+    - id: k3s-server01
+      ip: 192.168.121.181
+  managed-infrastructure:main:
+    identitystack: spigell/identity/vagrant
+    providers:
+      compute: external
+      s3: none
+  managed-infrastructure:s3: {}

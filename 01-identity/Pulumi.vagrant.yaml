@@ -1,0 +1,17 @@
+config:
+  identity:github:
+    managed: false
+  identity:local_users:
+    root:
+      password:
+        secure: AAABAFhviTA9RbNOpApbC7jw2IGBX+CtxJxtEMZbh3IB3xRwh1i5jA==
+  identity:organization: spigell
+  identity:ssh:
+    server_access:
+      credentials:
+        privatekey:
+          secure: AAABAO8YlFjhGwctuzdIron5pILD0eTH7fvhEdO8kOJZrLJI9sr06K2Fckb78bnzAxfI9wfQfjFfuG1cHuRS3dg+Toireg4GukgvQWsDRz7RSOB9sJE8coUmTtWzKZajALt+fVRrO9098W9IvLTQo82WkMV1oi7dR1UoxeeiQk1njU9bL7UWzoind5liKYfK0v28WcdGZeKWdnkqJXPPhHdeY9O+bBl6RaBhYbc7MzJqfUVXKtgnyV8VhF0wwgGuRYHgDuGcb4aYDlszcv0l7aLHUPNc++hGSvnQdedDIPgDpsfWi/8zfBY9xrBW3+DGxQoXcTP1vpYQaTbIkLKeKx9xBrGGb8g4Nuvz5Zcd3wC4pYs6Qj+b3WfK3/lQNmf+5lGEQJ3tiZ9pH4LH2p0dQJNc9LMdS6CtI+WiM0HpVQt7pZ+udcHVnj/4lfYXyc7gJwNheNmnMD44mwIewEByRkGrl5Zh5JU2HmxBwKFgmb20COEZDPWOzzpmqthQ+mMPgBy6YeKBj8OqSltTX5ZfTXVaVBRSdp1lQvSxoFr8yDV1LpFYtIzZdqNqewrW+O5vstGkAxoGDHfB0T42r6YQuDE495c48n7ZhYgovcqWFP5E6K9aOnzIeh/y/Q==
+        publickey: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK4MHJOkFLoJAc+57MfBWGrEVxaukEOD9rrUipZEpiUO
+        user: vagrant
+  identity:yandex:
+    managed: false
