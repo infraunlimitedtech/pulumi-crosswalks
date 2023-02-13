@@ -2,6 +2,7 @@ go 1.19
 
 use (
 	.
+	./01-identity
 	./02-managed-infrastructure
 	./03-managed-os
 	./04-k8s-cluster
