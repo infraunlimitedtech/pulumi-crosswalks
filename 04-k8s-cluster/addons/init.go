@@ -79,14 +79,23 @@ type Firewall struct {
 }
 
 func Init(ctx *pulumi.Context, s *spec.ClusterSpec) (*Addons, error) {
-	namespace := "kube-system"
+	namespace := "infra-system"
+
+	_, err := corev1.NewNamespace(ctx, namespace, &corev1.NamespaceArgs{
+		Metadata: &metav1.ObjectMetaArgs{
+			Name: pulumi.String(namespace),
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
 
 	// Init vars from stack's config
 	var pulumiAddonsCfg Addons
 	cfg := config.New(ctx, "")
 	cfg.RequireSecretObject("addons", &pulumiAddonsCfg)
 
-	_, err := corev1.NewLimitRange(ctx, namespace, &corev1.LimitRangeArgs{
+	_, err = corev1.NewLimitRange(ctx, namespace, &corev1.LimitRangeArgs{
 		ApiVersion: pulumi.String("v1"),
 		Kind:       pulumi.String("LimitRange"),
 		Metadata: &metav1.ObjectMetaArgs{

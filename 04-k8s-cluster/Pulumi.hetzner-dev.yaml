@@ -17,9 +17,8 @@ config:
         publicKey: bHk2u/HZQg5gOzmFXkk7QTRngPQfCtFEUnGFDSMQrC8=
       - allowedIPs:
         - 10.4.10.2/32
-        - 10.41.196.163/32
-        name: spigell-for-all
-        publicKey: DJNFqDV+zuBk0W3F03JsujYdRRc9hk8g2mm+PNj7jXU=
+        name: external-prometheus
+        publicKey: BmpQi9li9lS4DXLNZXeR4YJUs0d/3J2HDXc/2hxarlA=
       privateKey:
         secure: AAABANecFG5q5Hk2Sg3tlvzIsnyuZLqbhwpPYpd4ipgpB72awOrWYYr/WJ3lUCTT1wyTBKGToGYcseRIFtp+BU3UEFHjto5o41jdUA==
       version: 0.5.0
@@ -31,5 +30,8 @@ config:
       replica: 1
   k8s-cluster:main:
     infraStack: spigell/managed-infrastructure/hetzner-dev
+  k8s-cluster:rbac:
+    serviceAccounts:
+      prometheus: true
   k8s-cluster:spec:
-    internalDomainZone: local.intra.infraunlimited.tech
+    internalDomainZone: hetzner-dev.intra.infraunlimited.tech

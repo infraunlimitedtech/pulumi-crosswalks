@@ -4,6 +4,7 @@ import (
 	"k8s-cluster/addons"
 	"k8s-cluster/infra/firewall"
 	"k8s-cluster/rbac"
+	"k8s-cluster/rbac/sa"
 	"k8s-cluster/spec"
 
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
@@ -24,7 +25,9 @@ func main() {
 		if err != nil {
 			return err
 		}
-		if err := rbac.Init(ctx); err != nil {
+
+		kubeRBAC, err := rbac.Init(ctx)
+		if err != nil {
 			return err
 		}
 
@@ -44,6 +47,10 @@ func main() {
 		kilo, err := kubeClusterAddons.RunKilo()
 		if err != nil {
 			return err
+		}
+
+		if kubeRBAC.ServiceAccounts.Prometheus {
+			sa.PrometheusAccount(kubeClusterAddons.Namespace, ctx)
 		}
 
 		return firewall.Manage(ctx, infraLayerNodeInfo, kilo.GetRequiredFirewallRules())

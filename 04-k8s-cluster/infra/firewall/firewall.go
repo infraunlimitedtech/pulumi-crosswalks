@@ -3,10 +3,10 @@ package firewall
 import (
 	"errors"
 	"fmt"
-	"strconv"
 	"pulumi-crosswalks/utils"
 	"pulumi-crosswalks/utils/firewalld"
 	"pulumi-crosswalks/utils/hetzner"
+	"strconv"
 
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
@@ -24,13 +24,13 @@ func Manage(ctx *pulumi.Context, nodes pulumi.AnyOutput, rules []utils.FirewallR
 
 		case firewalld.Rule:
 			continue
-			
+
 		default:
 			return errUnknownFirewallRuleType
 		}
 	}
 
-	firewalls := []hetzner.Firewall{{ 
+	firewalls := []hetzner.Firewall{{
 		Rules: hrules, Name: fmt.Sprintf("%s-%s", ctx.Project(), ctx.Stack()),
 	}}
 
@@ -50,7 +50,6 @@ func Manage(ctx *pulumi.Context, nodes pulumi.AnyOutput, rules []utils.FirewallR
 			}
 			return ids
 		}).(pulumi.IntArrayOutput)
-
 
 		m[firewall.Name] = ids
 	}

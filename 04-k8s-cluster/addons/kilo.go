@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"path/filepath"
 	"pulumi-crosswalks/utils"
-	"pulumi-crosswalks/utils/hetzner"
 	"pulumi-crosswalks/utils/firewalld"
+	"pulumi-crosswalks/utils/hetzner"
 	"strconv"
 
 	kilov1 "k8s-cluster/crds/generated/squat/kilo/v1alpha1"
@@ -31,7 +31,7 @@ var (
 			Port:      strconv.Itoa(vpnPort),
 			SourceIps: []string{"0.0.0.0/0"},
 		},
-  }
+	}
 	firewalldFirewallRules = []firewalld.Rule{
 		{
 			Direction: "in",

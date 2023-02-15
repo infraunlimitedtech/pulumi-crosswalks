@@ -4,9 +4,22 @@ import (
 	metav1 "github.com/pulumi/pulumi-kubernetes/sdk/v3/go/kubernetes/meta/v1"
 	rbacv1 "github.com/pulumi/pulumi-kubernetes/sdk/v3/go/kubernetes/rbac/v1"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
+	"github.com/pulumi/pulumi/sdk/v3/go/pulumi/config"
+
+	"k8s-cluster/rbac/sa"
+
 )
 
-func Init(ctx *pulumi.Context) error {
+type RBAC struct {
+	ServiceAccounts *sa.ServiceAccounts
+}
+
+func Init(ctx *pulumi.Context) (*RBAC, error) {
+
+	var pulumiRBACCfg *RBAC
+	cfg := config.New(ctx, "")
+	cfg.RequireSecretObject("rbac", &pulumiRBACCfg)
+
 	_, err := rbacv1.NewClusterRoleBinding(ctx, "rbacInfraAdmins", &rbacv1.ClusterRoleBindingArgs{
 		ApiVersion: pulumi.String("rbac.authorization.k8s.io/v1"),
 		Kind:       pulumi.String("ClusterRoleBinding"),
@@ -27,8 +40,8 @@ func Init(ctx *pulumi.Context) error {
 		},
 	}, pulumi.DeleteBeforeReplace(true))
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return pulumiRBACCfg, err
 }
