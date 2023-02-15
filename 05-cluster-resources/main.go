@@ -12,14 +12,12 @@ func main() {
 			return err
 		}
 
-		if err := infra.RunNginxIngress(); err != nil {
-			return err
+		if infra.LB.NginxIngress.Enabled {
+			if err := infra.RunNginxIngress(); err != nil {
+				return err
+			}
 		}
 
-//		if err := infra.RunPrometheus(); err != nil {
-//			return err
-//		}
-
-		return infra.RunConsulStack()
+		return nil
 	})
 }

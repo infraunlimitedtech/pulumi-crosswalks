@@ -24,12 +24,14 @@ type LoadBalancersInfra struct {
 }
 
 type NginxIngressInfra struct {
+	Enabled   bool
 	Name      string
 	ClusterIP string
 	Helm      *HelmParams
 }
 
 type ConsulInfra struct {
+	Enabled      bool
 	GossipSecret string
 }
 
@@ -104,6 +106,8 @@ func Init(ctx *pulumi.Context) (*Infra, error) {
 			},
 		},
 	})
+	ingress := pulumiCfg.LB.NginxIngress
+	ingress.Name = "nginx-ingress"
 
 	i := &Infra{
 		Namespace: namespace,
@@ -112,11 +116,7 @@ func Init(ctx *pulumi.Context) (*Infra, error) {
 			InternalDomain: "intra.infraunlimited.tech",
 		},
 		LB: &LoadBalancersInfra{
-			NginxIngress: &NginxIngressInfra{
-				Name:      "nginx-ingress",
-				ClusterIP: pulumiCfg.LB.NginxIngress.ClusterIP,
-				Helm:      pulumiCfg.LB.NginxIngress.Helm,
-			},
+			NginxIngress: ingress,
 		},
 		Consul: pulumiCfg.Consul,
 	}

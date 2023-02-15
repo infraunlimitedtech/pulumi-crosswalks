@@ -1,0 +1,16 @@
+config:
+  cluster-resources:infra:
+    consul:
+      enabled: false
+      gossipSecret: gt/eU2SviB7SUvbOiqT6kcFclCkSwX0Uo13TfWewZQ0=
+    lb:
+      nginxIngress:
+        enabled: true
+        clusterIP: 10.41.2.1
+        helm:
+          version: 0.12.1
+  cluster-resources:vpn:
+    kilo:
+      peers: []
+
+  cluster-resources:serviceAccounts: {}

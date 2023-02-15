@@ -34,7 +34,7 @@ func (infra *Infra) RunPrometheus() error {
 				"sidecar": pulumi.Map{
 					"dashboards": pulumi.Map{
 						"multicluster": pulumi.Map{
-					        	"enabled": pulumi.Bool(true),
+							"enabled": pulumi.Bool(true),
 						},
 					},
 				},

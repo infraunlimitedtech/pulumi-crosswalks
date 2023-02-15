@@ -21,7 +21,7 @@ func (infra *Infra) RunNginxIngress() error {
 		Values: pulumi.Map{
 			"controller": pulumi.Map{
 				"name":                pulumi.String(name),
-				"replicaCount":        pulumi.Int(2),
+				"replicaCount":        pulumi.Int(1),
 				"setAsDefaultIngress": pulumi.Bool(true),
 				"service": pulumi.Map{
 					"create": pulumi.Bool(false),

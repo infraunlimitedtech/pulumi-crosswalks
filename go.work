@@ -6,5 +6,6 @@ use (
 	./02-managed-infrastructure
 	./03-managed-os
 	./04-k8s-cluster
+	./05-cluster-resources
 	./automation-api
 )
