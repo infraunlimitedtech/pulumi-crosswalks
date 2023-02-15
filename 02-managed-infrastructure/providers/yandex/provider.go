@@ -3,8 +3,8 @@ package yandex
 import (
 	"pulumi-crosswalks/utils"
 
-	"github.com/regrau/pulumi-yandex/sdk/go/yandex"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
+	"github.com/regrau/pulumi-yandex/sdk/go/yandex"
 )
 
 func InitProvider(ctx *pulumi.Context, creds pulumi.AnyOutput) (*yandex.Provider, error) {

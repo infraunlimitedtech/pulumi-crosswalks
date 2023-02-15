@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/regrau/pulumi-yandex/sdk/go/yandex"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
+	"github.com/regrau/pulumi-yandex/sdk/go/yandex"
 )
 
 type S3Config struct {
