@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"path/filepath"
 	"pulumi-crosswalks/utils"
-	"pulumi-crosswalks/utils/firewalld"
 	"pulumi-crosswalks/utils/hetzner"
 	"strconv"
 
@@ -25,14 +24,6 @@ const (
 
 var (
 	hetznerFirewallRules = []hetzner.Rule{
-		{
-			Direction: "in",
-			Protocol:  "udp",
-			Port:      strconv.Itoa(vpnPort),
-			SourceIps: []string{"0.0.0.0/0"},
-		},
-	}
-	firewalldFirewallRules = []firewalld.Rule{
 		{
 			Direction: "in",
 			Protocol:  "udp",
@@ -453,19 +444,14 @@ cp secrets/* /var/lib/kilo/`),
 }
 
 func (k *StartedKilo) GetRequiredFirewallRules() []utils.FirewallRule {
-	rules := make([]utils.FirewallRule, len(hetznerFirewallRules)+len(firewalldFirewallRules))
-	if k.Firewalls.Hetzner.Managed {
-		for i, hrule := range hetznerFirewallRules {
-			rules[i] = hrule
-		}
-	}
+	rules := make([]utils.FirewallRule, len(hetznerFirewallRules))
 
-	if k.Firewalls.Firewalld.Managed {
-		p := len(rules) - 1
-		for i, frule := range firewalldFirewallRules {
-			rules[p+i] = frule
-		}
-	}
+  if k.Firewalls.Hetzner.Managed {
+         for i, hrule := range hetznerFirewallRules {
+                 rules[i] = hrule
+         }
+  }
 
-	return rules
+  return rules
+
 }

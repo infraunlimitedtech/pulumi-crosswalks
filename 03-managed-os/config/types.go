@@ -58,9 +58,18 @@ type K3sConfig struct {
 
 type Wireguard struct {
 	IP              string
+	Firewall        *WGFirewall
 	MgmtNode        bool             `json:"-"`
 	CIDR            string           `json:"cidr"`
 	AdditionalPeers []AdditionalPeer `json:"additional_peers" yaml:"additional_peers"`
+}
+
+type WGFirewall struct {
+	Firewalld *WGFirewalld
+}
+
+type WGFirewalld struct {
+	Allowed bool
 }
 
 type AdditionalPeer struct {
@@ -69,5 +78,25 @@ type AdditionalPeer struct {
 }
 
 type Firewall struct {
-	Hetzner []hetzner.Firewall
+	Hetzner   []hetzner.Firewall
+	Firewalld *FWFirewalld
+}
+
+type FWFirewalld struct {
+	Enabled      bool
+	InternalZone *InternalZone
+	PublicZone   *PublicZone
+}
+
+type InternalZone struct {
+	RestrictToSources []*RestrictToSource
+}
+
+type RestrictToSource struct {
+	CIDR string
+	Name string
+}
+
+type PublicZone struct {
+	RemoveSSHService bool
 }

@@ -86,6 +86,7 @@ func defineCluster(c *cluster) (*definedCluster, error) {
 		},
 		Firewalls: &firewall.FirewallCfg{
 			Ctx:                c.ctx,
+			InternalIface:      c.InternalIface,
 			InfraLayerNodeInfo: c.InfraLayerNodeInfo,
 			Nodes:              allNodes,
 		},

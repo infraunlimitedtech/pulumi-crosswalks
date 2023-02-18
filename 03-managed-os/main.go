@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"managed-os/config"
+	"managed-os/modules/firewall/firewalld"
 	"managed-os/modules/k3s"
 	"managed-os/modules/wireguard"
 	"managed-os/utils"
@@ -38,9 +39,15 @@ func main() {
 			ctx:                ctx,
 			PulumiConfig:       pulumiCfg,
 			InfraLayerNodeInfo: infraLayerNodeInfo,
-			RequiredPkgs:       append(k3s.GetRequiredPkgs(), wireguard.GetRequiredPkgs()...),
-			InternalIface:      "kubewg0",
-			WgInfo:             wgInfo,
+			RequiredPkgs: append(
+				append(
+					k3s.GetRequiredPkgs(),
+					wireguard.GetRequiredPkgs()...,
+				),
+				firewalld.GetRequiredPkgs()...,
+			),
+			InternalIface: "kubewg0",
+			WgInfo:        wgInfo,
 		})
 		if err != nil {
 			err = fmt.Errorf("error init cluster: %w", err)
@@ -84,7 +91,7 @@ func main() {
 			return err
 		}
 
-		err = cluster.Firewalls.Manage()
+		err = cluster.Firewalls.Manage([]map[string]pulumi.Resource{reboot})
 		if err != nil {
 			ctx.Log.Error(err.Error(), nil)
 			return err

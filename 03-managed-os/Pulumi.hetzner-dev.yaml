@@ -20,6 +20,16 @@ config:
                 port: '51822'
                 protocol: udp
                 description: 'for wireguard interconnect'
+          firewalld:
+            enabled: true
+            publicZone:
+              removeSSHService: true
+            internalZone:
+              restrictToSources:
+                - name: infra-gw
+                  cidr: 45.14.15.131/32
+                - name: spigell-home
+                  cidr: 102.114.53.83/32
         k3s:
           config:
             node-ip: 127.0.0.1
@@ -28,6 +38,9 @@ config:
             token: token
           version: v1.25.4+k3s1
         wireguard:
+          firewall:
+            firewalld:
+              allowed: true
           cidr: 192.168.80.0/24
       servers:
         k3s:
