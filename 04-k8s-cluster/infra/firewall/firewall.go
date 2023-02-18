@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"pulumi-crosswalks/utils"
-	"pulumi-crosswalks/utils/firewalld"
 	"pulumi-crosswalks/utils/hetzner"
 	"strconv"
 
@@ -21,9 +20,6 @@ func Manage(ctx *pulumi.Context, nodes pulumi.AnyOutput, rules []utils.FirewallR
 		switch v := rule.(type) {
 		case hetzner.Rule:
 			hrules = append(hrules, v)
-
-		case firewalld.Rule:
-			continue
 
 		default:
 			return errUnknownFirewallRuleType

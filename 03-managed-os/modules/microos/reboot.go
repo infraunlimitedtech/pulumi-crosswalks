@@ -20,6 +20,10 @@ func (o *Cluster) Reboot(deps []map[string]pulumi.Resource) (map[string]pulumi.R
 				PrivateKey: utils.ExtractValueFromPulumiMapMap(o.InfraLayerNodeInfo, node.ID, "key"),
 			},
 			Create: pulumi.String("(sleep 1 && sudo shutdown -r now) &"),
+			Triggers: pulumi.Array{
+				// Bad! This is a hack to reboot target if packages reinstalled. The problem is that the idx can be changed
+				utils.ConvertMapSliceToSliceByKey(deps, node.ID)[0].(*remote.Command),
+			},
 		}, pulumi.DependsOn(utils.ConvertMapSliceToSliceByKey(deps, node.ID)))
 		if err != nil {
 			err = fmt.Errorf("error reboot node: %w", err)
