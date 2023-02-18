@@ -6,9 +6,9 @@ source "hcloud" "main" {
   server_type = "cpx11"
   snapshot_labels = {
     name    = "microos"
-    version = "test"
+    version = "production"
   }
-  snapshot_name = "microos-amd64-07-06"
+  snapshot_name = "microos-amd64-2023-02-12"
   ssh_username  = "root"
 }
 
