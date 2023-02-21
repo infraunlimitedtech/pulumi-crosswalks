@@ -222,6 +222,8 @@ github.com/prometheus/client_golang v1.11.1 h1:+4eQaD7vAZ6DsfsxB15hbE0odUjGI5ARs
 github.com/prometheus/client_golang v1.11.1/go.mod h1:Z6t4BnS23TR94PD6BsDNk8yVqroYurpAkEiz0P2BEV0=
 github.com/pulumi/pulumi-command/sdk v0.5.0 h1:HXQFDQ7PUIrWDcIvchIXcF3fgx/AngLdFoeCdtjj7EQ=
 github.com/pulumi/pulumi-command/sdk v0.5.0/go.mod h1:1H9bDyUQ7GeMq2a07jVM6cpKTZvGsHHEC3KwvqIfxr0=
+github.com/pulumi/pulumi-command/sdk v0.6.0 h1:+w3Mn0DMLaYiAAX5Ch2TZlcr6iBJ1lerX4aGHob0g+0=
+github.com/pulumi/pulumi-command/sdk v0.6.0/go.mod h1:aGkjsu71lOw7bE3F+y2wjNh7eB+i0o+m4CqiodDotiw=
 github.com/pulumi/pulumi/sdk/v3 v3.39.1/go.mod h1:Fw52iyR/4T9xWm7cTcshy4rGEXyPwhXKKEalczKZ8RY=
 github.com/pulumi/pulumi/sdk/v3 v3.44.2/go.mod h1:N5jL+cw5KiOeMn9bwvRuPQEAhbE3KPq2wSb/Kw+6HuY=
 github.com/pulumi/pulumi/sdk/v3 v3.47.0/go.mod h1:n5EPRVFDh+EFwYZ+oaZmEtwgVN1A6NnI82B7ks/bmTU=
