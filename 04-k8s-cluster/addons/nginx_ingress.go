@@ -13,17 +13,18 @@ func (a *Addons) RunNginxIngress() error {
 	addonName := a.NginxIngress.Name
 	ingressClassName := a.NginxIngress.Name
 
-	deploy, err := helmv3.NewChart(a.ctx, addonName, helmv3.ChartArgs{
+	deploy, err := helmv3.NewRelease(a.ctx, addonName, &helmv3.ReleaseArgs{
+		Name:     pulumi.String(addonName),
 		Chart:     pulumi.String("nginx-ingress"),
 		Namespace: pulumi.String(a.Namespace),
 		Version:   pulumi.String(a.NginxIngress.Helm.Version),
-		FetchArgs: helmv3.FetchArgs{
+		RepositoryOpts: &helmv3.RepositoryOptsArgs{
 			Repo: pulumi.String("https://helm.nginx.com/stable"),
 		},
 		Values: pulumi.Map{
 			"controller": pulumi.Map{
 				"name":         pulumi.String(addonName),
-				"replicaCount": pulumi.Int(2),
+				"replicaCount": pulumi.Int(1),
 				"nodeSelector": pulumi.Map{
 					"node-role.kubernetes.io/master": pulumi.String("true"),
 				},
@@ -54,11 +55,6 @@ func (a *Addons) RunNginxIngress() error {
 				},
 				"globalConfiguration": pulumi.Map{
 					"create": pulumi.Bool(false),
-				},
-				"config": pulumi.Map{
-					"entries": pulumi.Map{
-						"stream-snippets": pulumi.String("map_hash_bucket_size 512;\n map_hash_max_size 2048;"),
-					},
 				},
 			},
 		},
