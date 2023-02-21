@@ -17,13 +17,14 @@ function generate_nginxinc_crds() {
     "k8s.nginx.org_globalconfigurations.yaml"
     "k8s.nginx.org_transportservers.yaml"
   )
-  local version=$(pulumi config get --path 'addons.nginxIngress.helm.version')
+  local helm_version=$(pulumi config get --path 'addons.nginxIngress.helm.version')
+  local version=$(helm search repo nginx-ingress -l --output json | jq -r '.[] | select(.name == "nginx-stable/nginx-ingress") | select(.version == "'$helm_version'") | .app_version')
   local sources_path="crds/sources/nginxinc/nginx-ingress"
 
   mkdir -p ${sources_path}
 
   for f in ${crds[@]}; do 
-    curl -s -O -L https://raw.githubusercontent.com/nginxinc/kubernetes-ingress/${version}/deployments/helm-chart/crds/${f} --output-dir ${sources_path}
+    curl -s -O -L https://raw.githubusercontent.com/nginxinc/kubernetes-ingress/v${version}/deployments/helm-chart/crds/${f} --output-dir ${sources_path}
   done
   crd2pulumi --goPath crds/generated/nginxinc/kubernetes-ingress ${sources_path}/*.yaml --force
 
