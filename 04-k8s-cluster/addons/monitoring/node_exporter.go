@@ -30,6 +30,10 @@ func (m *Stack) runNodeExporter() error {
 					"effect":   pulumi.String("NoSchedule"),
 				},
 			},
+			"annotations": pulumi.Map{
+				"prometheus.io/scrape": pulumi.String("true"),
+				"prometheus.io/port":   pulumi.String("9100"),
+			},
 		},
 	})
 	if err != nil {
