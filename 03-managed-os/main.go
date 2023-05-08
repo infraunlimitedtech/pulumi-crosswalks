@@ -69,14 +69,14 @@ func main() {
 			return err
 		}
 
-		cfgDHCPClient, err := cluster.Os.ConfigureDHCPClient()
-		if err != nil {
-			err = fmt.Errorf("error while configure a dhcp client for microos: %w", err)
-			ctx.Log.Error(err.Error(), nil)
-			return err
-		}
+//		cfgDHCPClient, err := cluster.Os.ConfigureDHCPClient()
+//		if err != nil {
+//			err = fmt.Errorf("error while configure a dhcp client for microos: %w", err)
+//			ctx.Log.Error(err.Error(), nil)
+//			return err
+//		}
 
-		reboot, _ := cluster.Os.Reboot([]map[string]pulumi.Resource{pkgs, cfg, cfgDHCPClient})
+		reboot, _ := cluster.Os.Reboot([]map[string]pulumi.Resource{pkgs, cfg})
 
 		wgCluster, err := cluster.Wireguard.Manage([]map[string]pulumi.Resource{reboot})
 		if err != nil {

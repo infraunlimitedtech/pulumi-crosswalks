@@ -47,7 +47,7 @@ func New(ctx *pulumi.Context,
 
 		Create: pulumi.String("sudo systemctl enable --now firewalld"),
 		Delete: pulumi.String("sudo systemctl disable --now firewalld"),
-	}, pulumi.DependsOn(fwd.DependsOn))
+	}, pulumi.DeleteBeforeReplace(true), pulumi.DependsOn(fwd.DependsOn))
 
 	if err != nil {
 		return nil, err

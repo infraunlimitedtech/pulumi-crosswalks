@@ -92,7 +92,7 @@ func (f *Firewalld) addRule(rule Rule) (pulumi.Resource, error) {
 
 		Create: pulumi.String(cmdCreate),
 		Delete: pulumi.String(cmdDelete),
-	}, pulumi.DependsOn(f.DependsOn))
+	}, pulumi.DeleteBeforeReplace(true), pulumi.DependsOn(f.DependsOn))
 	if err != nil {
 		err = fmt.Errorf("error while adding rules to firewalld: %w", err)
 		return nil, err

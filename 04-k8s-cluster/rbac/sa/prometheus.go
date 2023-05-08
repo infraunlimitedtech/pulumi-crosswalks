@@ -8,7 +8,7 @@ import (
 	corev1 "github.com/pulumi/pulumi-kubernetes/sdk/v3/go/kubernetes/core/v1"
 )
 
-func PrometheusAccount(ns string, ctx *pulumi.Context) error {
+func PrometheusAccount(ns *corev1.Namespace, ctx *pulumi.Context) error {
 	serviceName := "infra-prometheus"
 
 	serviceAccount, err := corev1.NewServiceAccount(ctx, "promServiceAccount", &corev1.ServiceAccountArgs{
@@ -16,7 +16,7 @@ func PrometheusAccount(ns string, ctx *pulumi.Context) error {
 		Kind:       pulumi.String("ServiceAccount"),
 		Metadata: &metav1.ObjectMetaArgs{
 			Name:      pulumi.String(serviceName),
-			Namespace: pulumi.String(ns),
+			Namespace: ns.Metadata.Name(),
 		},
 	})
 	if err != nil {
@@ -27,7 +27,7 @@ func PrometheusAccount(ns string, ctx *pulumi.Context) error {
 		ApiVersion: pulumi.String("rbac.authorization.k8s.io/v1"),
 		Kind:       pulumi.String("ClusterRole"),
 		Metadata: &metav1.ObjectMetaArgs{
-			Name: pulumi.String(serviceName),
+			Name: serviceAccount.Metadata.Name(),
 		},
 		Rules: rbacv1.PolicyRuleArray{
 			&rbacv1.PolicyRuleArgs{
@@ -61,7 +61,6 @@ func PrometheusAccount(ns string, ctx *pulumi.Context) error {
 			},
 		},
 	})
-
 	if err != nil {
 		return err
 	}
@@ -70,8 +69,8 @@ func PrometheusAccount(ns string, ctx *pulumi.Context) error {
 		ApiVersion: pulumi.String("rbac.authorization.k8s.io/v1"),
 		Kind:       pulumi.String("ClusterRoleBinding"),
 		Metadata: &metav1.ObjectMetaArgs{
-			Name:      pulumi.String(serviceName),
-			Namespace: pulumi.String(ns),
+			Name:      serviceAccount.Metadata.Name().Elem(),
+			Namespace: serviceAccount.Metadata.Namespace().Elem(),
 		},
 		RoleRef: &rbacv1.RoleRefArgs{
 			ApiGroup: pulumi.String("rbac.authorization.k8s.io"),
@@ -82,7 +81,7 @@ func PrometheusAccount(ns string, ctx *pulumi.Context) error {
 			&rbacv1.SubjectArgs{
 				Kind:      pulumi.String("ServiceAccount"),
 				Name:      serviceAccount.Metadata.Name().Elem(),
-				Namespace: pulumi.String(ns),
+				Namespace: serviceAccount.Metadata.Namespace().Elem(),
 			},
 		},
 	})

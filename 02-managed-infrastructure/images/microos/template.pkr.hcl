@@ -8,7 +8,7 @@ source "hcloud" "main" {
     name    = "microos"
     version = "production"
   }
-  snapshot_name = "microos-amd64-2023-02-12"
+  snapshot_name = "microos-amd64-2023-04-24"
   ssh_username  = "root"
 }
 

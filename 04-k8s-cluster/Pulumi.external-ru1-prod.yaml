@@ -1,0 +1,34 @@
+config:
+  k8s-cluster:addons:
+    monitoring:
+      nodeExporter:
+        helm:
+          version: 4.17.2
+    kilo:
+      crds:
+        path: crds/sources/squat/kilo
+      peers:
+        - allowedIPs:
+            - 10.4.10.1/32
+          name: spigell
+          publicKey: vwhPDDQ+yurUmkjDhsQqmdTF98UfAf2uF4UdlJt/VFQ=
+        - allowedIPs:
+            - 10.4.10.2/32
+          name: external-prometheus
+          publicKey: BmpQi9li9lS4DXLNZXeR4YJUs0d/3J2HDXc/2hxarlA=
+      privateKey:
+        secure: AAABAE81G8vgYasDQhlhh4RTvN1R8uOcqWTw+RDt6wnNpy3/QjfoRYoxTIu0l8biTcE8GGkk7T4WWrYiyZ8hzfB4uMrT1ATXi5NJ/w==
+      version: 0.5.0
+    nginxIngress:
+      helm:
+        version: 0.16.2
+      kubeapi:
+        clusterIp: 10.91.1.1
+      replica: 1
+  k8s-cluster:main:
+    infraStack: spigell/managed-infrastructure/external-ru1-prod
+  k8s-cluster:rbac:
+    serviceAccounts:
+      prometheus: true
+  k8s-cluster:spec:
+    internalDomainZone: int.k3s.ru1.infraunlimited.tech

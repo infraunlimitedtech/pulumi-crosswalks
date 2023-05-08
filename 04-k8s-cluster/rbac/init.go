@@ -1,13 +1,12 @@
 package rbac
 
 import (
+	"k8s-cluster/rbac/sa"
+
 	metav1 "github.com/pulumi/pulumi-kubernetes/sdk/v3/go/kubernetes/meta/v1"
 	rbacv1 "github.com/pulumi/pulumi-kubernetes/sdk/v3/go/kubernetes/rbac/v1"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi/config"
-
-	"k8s-cluster/rbac/sa"
-
 )
 
 type RBAC struct {
@@ -15,7 +14,6 @@ type RBAC struct {
 }
 
 func Init(ctx *pulumi.Context) (*RBAC, error) {
-
 	var pulumiRBACCfg *RBAC
 	cfg := config.New(ctx, "")
 	cfg.RequireSecretObject("rbac", &pulumiRBACCfg)

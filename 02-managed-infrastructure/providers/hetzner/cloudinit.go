@@ -5,8 +5,9 @@ import (
 )
 
 type CloudConfig struct {
+	SshPwauth bool `yaml:"ssh_pwauth"`
 	Users    []*UserCloudConfig
-	FQDN     string
+	Hostname  string
 	GrowPart *GrowPartConfig
 }
 
@@ -14,6 +15,8 @@ type UserCloudConfig struct {
 	Name              string
 	Sudo              string
 	SSHAuthorizedKeys []string `yaml:"ssh_authorized_keys"`
+	LockPasswd        bool     `yaml:"lock_passwd"`
+	Passwd            string
 }
 
 type GrowPartConfig struct {

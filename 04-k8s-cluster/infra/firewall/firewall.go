@@ -10,9 +10,7 @@ import (
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
 
-var (
-	errUnknownFirewallRuleType = errors.New("unknown firewall rule type")
-)
+var errUnknownFirewallRuleType = errors.New("unknown firewall rule type")
 
 func Manage(ctx *pulumi.Context, nodes pulumi.AnyOutput, rules []utils.FirewallRule) error {
 	hrules := make([]hetzner.Rule, 0)

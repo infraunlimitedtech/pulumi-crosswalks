@@ -22,7 +22,7 @@ import (
 const (
 	// Base snapshot for microOs.
 	provider          = "hetzner"
-	defaultImage      = "99554617"
+	defaultImage      = "108334614"
 	defaultServerType = "cpx11"
 	defaultLocation   = "hel1"
 )
@@ -34,6 +34,7 @@ type ComputeConfig struct {
 
 type ConfigurationConfig struct {
 	Firewall []hetzner.Firewall
+	ClusterName string
 	Servers  *ServersConfig
 }
 
@@ -67,6 +68,7 @@ type Body struct {
 func ManageCompute(ctx *pulumi.Context, sshCreds pulumi.Output, cfg *ComputeConfig) (*ComputedInfra, error) {
 	nodes := make(map[string]map[string]interface{})
 	cfg.sshCreds = sshCreds
+	cfg.Configuration.ClusterName = ctx.Stack()
 
 	computedInfo, err := cfg.manage(ctx)
 	if err != nil {
@@ -118,18 +120,18 @@ func (i *ComputeConfig) manage(ctx *pulumi.Context) (map[string]map[string]inter
 		}
 
 		userdata := &CloudConfig{
-			FQDN: fmt.Sprintf("%s.%s", srv.ID, "infraunlimited.tech"),
 			GrowPart: &GrowPartConfig{
 				Devices: []string{
 					"/var",
 				},
 			},
 		}
+		serverName := fmt.Sprintf("%s.%s.%s", srv.ID, i.Configuration.ClusterName, "infraunlimited.tech")
 
 		args := &hcloud.ServerArgs{
 			ServerType: pulumi.String(srv.ServerType),
 			Location:   pulumi.String(srv.Location),
-			Name:       pulumi.String(srv.ID),
+			Name:       pulumi.String(serverName),
 			UserData: i.sshCreds.ApplyT(func(v interface{}) string {
 				m := v.(map[string]interface{})
 				userdata.Users = []*UserCloudConfig{
@@ -139,6 +141,9 @@ func (i *ComputeConfig) manage(ctx *pulumi.Context) (map[string]map[string]inter
 						SSHAuthorizedKeys: []string{
 							m["publickey"].(string),
 						},
+						// Need to be encrypted
+						// k3s4ever
+						Passwd: "$6$y184E3Ic0PiyOHcN$BguLDhU9rb6uqv6P.g/22ViZnzapXM5ukg/zYASxA3zB43gx30XG73OGZhEt07GSKc4RIsefMcaSNsoXmrqxI1",
 					},
 				}
 				rendered, _ := userdata.render()
@@ -153,7 +158,7 @@ func (i *ComputeConfig) manage(ctx *pulumi.Context) (map[string]map[string]inter
 				Scheme:   "http",
 				Host:     os.Getenv("AUTOMATION_API_HTTP_ADDR"),
 				Path:     "hetzner/snapshots",
-				RawQuery: fmt.Sprintf("server=%s", srv.ID),
+				RawQuery: fmt.Sprintf("server=%s", serverName),
 			}
 
 			req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, url.String(), nil)
@@ -204,7 +209,7 @@ func (i *ComputeConfig) manage(ctx *pulumi.Context) (map[string]map[string]inter
 			args.FirewallIds = fwRules
 		}
 
-		created, err := hcloud.NewServer(ctx, srv.ID, args)
+		created, err := hcloud.NewServer(ctx, serverName, args)
 		if err != nil {
 			return nodes, err
 		}

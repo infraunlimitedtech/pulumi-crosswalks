@@ -1,6 +1,4 @@
 config:
-  hcloud:token:
-    secure: AAABADHk3mp37JX23P/+qZRNJtNARDySxxh/1wDq6+U3b+X8WtyBzKlN2kyrJZtBBJzFFIb///tOazVsNjPlZ9JCPsIyKz9jfqYoHxkMP6MY4gZY5SAh+u++A9L1QALU
   managed-os:main:
     defaults:
       agents:
@@ -17,37 +15,24 @@ config:
               restrictToSources:
                 - cidr: 45.14.15.131/32
                   name: infra-gw
-                - cidr: 102.114.53.83/32
-                  name: spigell-home
             publicZone:
               removeSSHService: true
-          hetzner:
-            - name: hetzner-dev-managed-os
-              rules:
-                - description: for wireguard interconnect
-                  port: "51822"
-                  protocol: udp
-                  sourceIps:
-                    - 0.0.0.0/0
-                    - ::/0
         k3s:
           config:
-            node-ip: 127.0.0.1
-            node-label:
-              - k3os.io/upgrade=disabled
-            token: token
+            token:
+              secure: AAABABAZZ0pm0CTsdVQuRXjrAWW9+r4P8oLt+CwZdS6nookmy4J76aPKiCJ3Tg+gaEBh
           version: v1.26.4+k3s1
         wireguard:
-          cidr: 192.168.80.0/24
+          cidr: 192.168.90.0/24
           firewall:
             firewalld:
               allowed: true
       servers:
         k3s:
           config:
-            cluster-cidr: 10.40.0.0/16
-            cluster-dns: 10.41.0.10
-            cluster-domain: hetzner-dev.intra.infraunlimited.tech
+            cluster-cidr: 10.90.0.0/16
+            cluster-dns: 10.91.0.10
+            cluster-domain: k3s.ru1.infraunlimited.tech
             disable:
               - metrics-server
               - traefik
@@ -64,14 +49,11 @@ config:
             node-taint:
               - CriticalAddonsOnly=true:NoExecute
               - node-role.kubernetes.io/control-plane:NoSchedule
-            service-cidr: 10.41.0.0/16
-    id_stack: spigell/identity/local
-    infra_stack: spigell/managed-infrastructure/hetzner-dev
+            service-cidr: 10.91.0.0/16
+    id_stack: spigell/identity/prod
+    infra_stack: spigell/managed-infrastructure/external-ru1-prod
     nodes:
-      agents:
-        - id: k3s-agent01
-        - id: k3s-agent02
-        - id: k3s-agent03
+      agents: []
       servers:
-        - id: k3s-server01
+        - id: pq-prod-ru1-server01
           leader: true
