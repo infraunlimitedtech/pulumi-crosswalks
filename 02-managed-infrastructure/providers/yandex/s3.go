@@ -23,7 +23,7 @@ type S3Infra struct {
 	storage map[string]map[string]interface{}
 }
 
-func ManageS3(ctx *pulumi.Context, cfg *S3Config, creds pulumi.AnyOutput, p *yandex.Provider) (*S3Infra, error) {
+func ManageS3(ctx *pulumi.Context, cfg *S3Config, p *yandex.Provider) (*S3Infra, error) {
 	s := make(map[string]map[string]interface{})
 	for _, bucket := range cfg.Buckets {
 		args := &yandex.StorageBucketArgs{

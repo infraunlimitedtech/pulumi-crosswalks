@@ -50,7 +50,7 @@ func main() {
 			if err != nil {
 				return err
 			}
-			s, err = yandex.ManageS3(ctx, cfg.S3.Yandex, creds, p)
+			s, err = yandex.ManageS3(ctx, cfg.S3.Yandex, p)
 			if err != nil {
 				return err
 			}

@@ -5,10 +5,10 @@ import (
 )
 
 type CloudConfig struct {
-	SshPwauth bool `yaml:"ssh_pwauth"`
-	Users    []*UserCloudConfig
+	SSHPwauth bool `yaml:"ssh_pwauth"`
+	Users     []*UserCloudConfig
 	Hostname  string
-	GrowPart *GrowPartConfig
+	GrowPart  *GrowPartConfig
 }
 
 type UserCloudConfig struct {

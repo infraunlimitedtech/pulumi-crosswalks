@@ -33,9 +33,9 @@ type ComputeConfig struct {
 }
 
 type ConfigurationConfig struct {
-	Firewall []hetzner.Firewall
+	Firewall    []hetzner.Firewall
 	ClusterName string
-	Servers  *ServersConfig
+	Servers     *ServersConfig
 }
 
 type ServersConfig struct {
