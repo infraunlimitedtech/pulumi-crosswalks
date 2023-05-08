@@ -6,11 +6,11 @@ import (
 )
 
 func (a *Addons) RunMetricServer() error {
-	_, err := helmv3.NewChart(a.ctx, "metrics-server", helmv3.ChartArgs{
+	_, err := helmv3.NewRelease(a.ctx, "metrics-server", &helmv3.ReleaseArgs{
 		Chart:     pulumi.String("metrics-server"),
-		Version:   pulumi.String("v6.0.7"),
-		Namespace: pulumi.String(a.Namespace),
-		FetchArgs: helmv3.FetchArgs{
+		Version:   pulumi.String("v6.2.17"),
+		Namespace: a.Namespace.Metadata.Name().Elem(),
+		RepositoryOpts: &helmv3.RepositoryOptsArgs{
 			Repo: pulumi.String("https://charts.bitnami.com/bitnami"),
 		},
 		Values: pulumi.Map{

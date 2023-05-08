@@ -11,10 +11,19 @@ import (
 
 type Addons struct {
 	ctx          *pulumi.Context
-	Namespace    string
+	Namespace    *corev1.Namespace
 	Kilo         *Kilo
 	MetalLb      *MetalLb
 	NginxIngress *NginxIngress
+	Monitoring   *Monitoring
+}
+
+type Monitoring struct {
+	NodeExporter *NodeExporter
+}
+
+type NodeExporter struct {
+	Helm *HelmParams
 }
 
 type MetalLb struct {
@@ -81,7 +90,7 @@ type Firewall struct {
 func Init(ctx *pulumi.Context, s *spec.ClusterSpec) (*Addons, error) {
 	namespace := "infra-system"
 
-	_, err := corev1.NewNamespace(ctx, namespace, &corev1.NamespaceArgs{
+	ns, err := corev1.NewNamespace(ctx, namespace, &corev1.NamespaceArgs{
 		Metadata: &metav1.ObjectMetaArgs{
 			Name: pulumi.String(namespace),
 		},
@@ -107,7 +116,6 @@ func Init(ctx *pulumi.Context, s *spec.ClusterSpec) (*Addons, error) {
 				&corev1.LimitRangeItemArgs{
 					Default: pulumi.StringMap{
 						"memory": pulumi.String("128Mi"),
-						"cpu":    pulumi.String("200m"),
 					},
 					DefaultRequest: pulumi.StringMap{
 						"memory": pulumi.String("64Mi"),
@@ -123,13 +131,18 @@ func Init(ctx *pulumi.Context, s *spec.ClusterSpec) (*Addons, error) {
 	}
 
 	a := &Addons{
-		Namespace: namespace,
+		Namespace: ns,
 		ctx:       ctx,
 		NginxIngress: &NginxIngress{
 			Name:    "nginx-ingress-addon",
 			Domain:  s.InternalDomainZone,
 			Helm:    pulumiAddonsCfg.NginxIngress.Helm,
 			KubeAPI: pulumiAddonsCfg.NginxIngress.KubeAPI,
+		},
+		Monitoring: &Monitoring{
+			NodeExporter: &NodeExporter{
+				Helm: pulumiAddonsCfg.Monitoring.NodeExporter.Helm,
+			},
 		},
 		MetalLb: pulumiAddonsCfg.MetalLb,
 		Kilo:    pulumiAddonsCfg.Kilo,

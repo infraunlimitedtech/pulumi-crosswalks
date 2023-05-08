@@ -22,18 +22,17 @@ const (
 	serviceName = "kilo"
 )
 
-var (
-	hetznerFirewallRules = []hetzner.Rule{
-		{
-			Direction: "in",
-			Protocol:  "udp",
-			Port:      strconv.Itoa(vpnPort),
-			SourceIps: []string{"0.0.0.0/0"},
-		},
-	}
-)
+var hetznerFirewallRules = []hetzner.Rule{
+	{
+		Direction: "in",
+		Protocol:  "udp",
+		Port:      strconv.Itoa(vpnPort),
+		SourceIps: []string{"0.0.0.0/0"},
+	},
+}
 
 type StartedKilo struct {
+	Deployed  bool
 	Firewalls *Firewalls
 }
 
@@ -43,7 +42,7 @@ func (a *Addons) RunKilo() (*StartedKilo, error) {
 		Kind:       pulumi.String("ServiceAccount"),
 		Metadata: &metav1.ObjectMetaArgs{
 			Name:      pulumi.String(serviceName),
-			Namespace: pulumi.String(a.Namespace),
+			Namespace: a.Namespace.Metadata.Name(),
 		},
 	})
 	if err != nil {
@@ -55,7 +54,7 @@ func (a *Addons) RunKilo() (*StartedKilo, error) {
 		Kind:       pulumi.String("ClusterRole"),
 		Metadata: &metav1.ObjectMetaArgs{
 			Name:      pulumi.String(serviceName),
-			Namespace: pulumi.String(a.Namespace),
+			Namespace: serviceAccount.Metadata.Namespace(),
 		},
 		Rules: rbacv1.PolicyRuleArray{
 			&rbacv1.PolicyRuleArgs{
@@ -105,7 +104,7 @@ func (a *Addons) RunKilo() (*StartedKilo, error) {
 		Kind:       pulumi.String("ClusterRoleBinding"),
 		Metadata: &metav1.ObjectMetaArgs{
 			Name:      pulumi.String(serviceName),
-			Namespace: pulumi.String(a.Namespace),
+			Namespace: serviceAccount.Metadata.Namespace(),
 		},
 		RoleRef: &rbacv1.RoleRefArgs{
 			ApiGroup: pulumi.String("rbac.authorization.k8s.io"),
@@ -116,7 +115,7 @@ func (a *Addons) RunKilo() (*StartedKilo, error) {
 			&rbacv1.SubjectArgs{
 				Kind:      pulumi.String("ServiceAccount"),
 				Name:      serviceAccount.Metadata.Name().Elem(),
-				Namespace: pulumi.String(a.Namespace),
+				Namespace: a.Namespace.Metadata.Name(),
 			},
 		},
 	})
@@ -129,7 +128,7 @@ func (a *Addons) RunKilo() (*StartedKilo, error) {
 		Kind:       pulumi.String("ConfigMap"),
 		Metadata: &metav1.ObjectMetaArgs{
 			Name:      pulumi.String("kilo-scripts"),
-			Namespace: pulumi.String(a.Namespace),
+			Namespace: a.Namespace.Metadata.Name(),
 		},
 		Data: pulumi.StringMap{
 			"init.sh": pulumi.String(`#!/bin/sh
@@ -164,7 +163,7 @@ cp secrets/* /var/lib/kilo/`),
 	privateKey, err := corev1.NewSecret(a.ctx, "kiloPrivateKey", &corev1.SecretArgs{
 		Metadata: &metav1.ObjectMetaArgs{
 			Name:      pulumi.String("kilo-private-key"),
-			Namespace: pulumi.String(a.Namespace),
+			Namespace: a.Namespace.Metadata.Name(),
 		},
 		Type: pulumi.String("Opaque"),
 		StringData: pulumi.StringMap{
@@ -175,12 +174,12 @@ cp secrets/* /var/lib/kilo/`),
 		return nil, err
 	}
 
-	_, err = appsv1.NewDeployment(a.ctx, "kiloDeployment", &appsv1.DeploymentArgs{
+	deploy, err := appsv1.NewDeployment(a.ctx, "kiloDeployment", &appsv1.DeploymentArgs{
 		ApiVersion: pulumi.String("apps/v1"),
 		Kind:       pulumi.String("Deployment"),
 		Metadata: &metav1.ObjectMetaArgs{
 			Name:      pulumi.String(serviceName),
-			Namespace: pulumi.String(a.Namespace),
+			Namespace: a.Namespace.Metadata.Name(),
 			Labels: pulumi.StringMap{
 				"app.kubernetes.io/name":    pulumi.String("kilo"),
 				"app.kubernetes.io/part-of": pulumi.String("kilo"),
@@ -391,7 +390,7 @@ cp secrets/* /var/lib/kilo/`),
 		Kind:       pulumi.String("Service"),
 		Metadata: &metav1.ObjectMetaArgs{
 			Name:      pulumi.String("kilo-vpn"),
-			Namespace: pulumi.String(a.Namespace),
+			Namespace: deploy.Metadata.Namespace().Elem(),
 		},
 		Spec: &corev1.ServiceSpecArgs{
 			Type: pulumi.String("NodePort"),
@@ -413,10 +412,9 @@ cp secrets/* /var/lib/kilo/`),
 		return nil, err
 	}
 
-	_, err = yaml.NewConfigGroup(a.ctx, "kiloCrds", &yaml.ConfigGroupArgs{
+	deployCRDS, err := yaml.NewConfigGroup(a.ctx, "kiloCrds", &yaml.ConfigGroupArgs{
 		Files: []string{filepath.Join(a.Kilo.Crds.Path, "*.yaml")},
 	})
-
 	if err != nil {
 		return nil, err
 	}
@@ -425,33 +423,38 @@ cp secrets/* /var/lib/kilo/`),
 		_, err = kilov1.NewPeer(a.ctx, fmt.Sprintf("kiloPeer_%v", peer.Name), &kilov1.PeerArgs{
 			Metadata: &metav1.ObjectMetaArgs{
 				Name:      pulumi.String(peer.Name),
-				Namespace: pulumi.String(a.Namespace),
+				Namespace: a.Namespace.Metadata.Name(),
 			},
 			Spec: &kilov1.PeerSpecArgs{
 				AllowedIPs:          pulumi.ToStringArray(peer.AllowedIPs),
 				PublicKey:           pulumi.String(peer.PublicKey),
 				PersistentKeepalive: pulumi.Int(10),
 			},
-		})
+		}, pulumi.DependsOn([]pulumi.Resource{deployCRDS}))
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	return &StartedKilo{
-		Firewalls: a.Kilo.Firewalls,
-	}, nil
+	startedKilo := &StartedKilo{
+		Deployed: true,
+	}
+
+	if a.Kilo.Firewalls != nil {
+		startedKilo.Firewalls = a.Kilo.Firewalls
+	}
+
+	return startedKilo, nil
 }
 
 func (k *StartedKilo) GetRequiredFirewallRules() []utils.FirewallRule {
-	rules := make([]utils.FirewallRule, len(hetznerFirewallRules))
+	rules := make([]utils.FirewallRule, 0)
 
-  if k.Firewalls.Hetzner.Managed {
-         for i, hrule := range hetznerFirewallRules {
-                 rules[i] = hrule
-         }
-  }
+	if k.Firewalls.Hetzner != nil && k.Firewalls.Hetzner.Managed {
+		for i, hrule := range hetznerFirewallRules {
+			rules[i] = hrule
+		}
+	}
 
-  return rules
-
+	return rules
 }

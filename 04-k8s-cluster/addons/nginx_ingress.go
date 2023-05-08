@@ -14,9 +14,9 @@ func (a *Addons) RunNginxIngress() error {
 	ingressClassName := a.NginxIngress.Name
 
 	deploy, err := helmv3.NewRelease(a.ctx, addonName, &helmv3.ReleaseArgs{
-		Name:     pulumi.String(addonName),
+		Name:      pulumi.String(addonName),
 		Chart:     pulumi.String("nginx-ingress"),
-		Namespace: pulumi.String(a.Namespace),
+		Namespace: a.Namespace.Metadata.Name().Elem(),
 		Version:   pulumi.String(a.NginxIngress.Helm.Version),
 		RepositoryOpts: &helmv3.RepositoryOptsArgs{
 			Repo: pulumi.String("https://helm.nginx.com/stable"),
@@ -101,7 +101,7 @@ func (a *Addons) RunNginxIngress() error {
 		Kind:       pulumi.String("Service"),
 		Metadata: &metav1.ObjectMetaArgs{
 			Name:      pulumi.String("kube-api"),
-			Namespace: pulumi.String(a.Namespace),
+			Namespace: deploy.Namespace,
 		},
 		Spec: &corev1.ServiceSpecArgs{
 			Selector: pulumi.StringMap{
