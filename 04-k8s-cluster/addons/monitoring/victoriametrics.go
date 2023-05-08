@@ -3,7 +3,9 @@ package monitoring
 import (
 	"fmt"
 
+	corev1 "github.com/pulumi/pulumi-kubernetes/sdk/v3/go/kubernetes/core/v1"
 	helmv3 "github.com/pulumi/pulumi-kubernetes/sdk/v3/go/kubernetes/helm/v3"
+	metav1 "github.com/pulumi/pulumi-kubernetes/sdk/v3/go/kubernetes/meta/v1"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
 
@@ -38,6 +40,34 @@ func (m *Stack) runVM() error {
 	})
 	if err != nil {
 		return fmt.Errorf("helm: %w", err)
+	}
+
+	// Create a service with clusterIP for VictoriaMetrics.
+	// Because some of our services outside of the cluster need to connect to VM somehow without inCluster dns.
+	// But with Stateful set the helm chart creates only headless service
+	_, err = corev1.NewService(m.ctx, appName, &corev1.ServiceArgs{
+		Metadata: &metav1.ObjectMetaArgs{
+			Name:      pulumi.String(appName),
+			Namespace: m.Namespace.Metadata.Name().Elem(),
+		},
+		Spec: &corev1.ServiceSpecArgs{
+			Ports: corev1.ServicePortArray{
+				corev1.ServicePortArgs{
+					Name:       pulumi.String("http"),
+					Port:       pulumi.Int(8428),
+					TargetPort: pulumi.Int(8428),
+				},
+			},
+			Selector: pulumi.StringMap{
+				"app.kubernetes.io/instance": pulumi.String(appName),
+			},
+			Type:      pulumi.String("ClusterIP"),
+			ClusterIP: pulumi.String("10.91.1.20"),
+		},
+	})
+
+	if err != nil {
+		return fmt.Errorf("k8s service: %w", err)
 	}
 
 	return nil
