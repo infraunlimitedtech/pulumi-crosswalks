@@ -1,3 +1,0 @@
-name: managed-infrastructure-hetzner-snapshots
-runtime: go
-description: A minimal Go Pulumi program
