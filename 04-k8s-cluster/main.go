@@ -2,6 +2,7 @@ package main
 
 import (
 	"k8s-cluster/addons"
+	"k8s-cluster/addons/monitoring"
 	"k8s-cluster/infra/firewall"
 	"k8s-cluster/rbac"
 	"k8s-cluster/rbac/sa"
@@ -49,10 +50,22 @@ func main() {
 			return err
 		}
 
+		err = monitoring.Run(ctx, kubeClusterAddons.Monitoring)
+		if err != nil {
+			return err
+		}
+
 		if kubeRBAC.ServiceAccounts.Prometheus {
 			sa.PrometheusAccount(kubeClusterAddons.Namespace, ctx)
 		}
 
-		return firewall.Manage(ctx, infraLayerNodeInfo, kilo.GetRequiredFirewallRules())
+		if kilo.Firewalls != nil {
+			err = firewall.Manage(ctx, infraLayerNodeInfo, kilo.GetRequiredFirewallRules())
+			if err != nil {
+				return err
+			}
+		}
+
+		return nil
 	})
 }
