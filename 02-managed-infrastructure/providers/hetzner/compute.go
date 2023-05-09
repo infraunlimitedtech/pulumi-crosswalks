@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"managed-infrastructure/utils"
 	"net/http"
 	"net/url"
 	"os"
@@ -29,7 +28,7 @@ const (
 
 type ComputeConfig struct {
 	Configuration *ConfigurationConfig
-	sshCreds      pulumi.Output
+	sshCreds      map[string]string
 }
 
 type ConfigurationConfig struct {
@@ -65,7 +64,7 @@ type Body struct {
 	ID int
 }
 
-func ManageCompute(ctx *pulumi.Context, sshCreds pulumi.Output, cfg *ComputeConfig) (*ComputedInfra, error) {
+func ManageCompute(ctx *pulumi.Context, sshCreds map[string]string, cfg *ComputeConfig) (*ComputedInfra, error) {
 	nodes := make(map[string]map[string]interface{})
 	cfg.sshCreds = sshCreds
 	cfg.Configuration.ClusterName = ctx.Stack()
@@ -76,8 +75,8 @@ func ManageCompute(ctx *pulumi.Context, sshCreds pulumi.Output, cfg *ComputeConf
 	}
 
 	for k, v := range computedInfo {
-		v["key"] = utils.ExtractFromExportedMap(sshCreds, "privatekey")
-		v["user"] = utils.ExtractFromExportedMap(sshCreds, "user")
+		v["key"] = pulumi.ToSecret(sshCreds["privatekey"])
+		v["user"] = sshCreds["user"]
 		nodes[k] = v
 	}
 
@@ -125,30 +124,32 @@ func (i *ComputeConfig) manage(ctx *pulumi.Context) (map[string]map[string]inter
 					"/var",
 				},
 			},
+			Users: []*UserCloudConfig{
+				{
+					Name: i.sshCreds["user"],
+					Sudo: "ALL=(ALL) NOPASSWD:ALL",
+					SSHAuthorizedKeys: []string{
+						i.sshCreds["publickey"],
+					},
+					// Need to be encrypted
+					// k3s4ever
+					Passwd: "$6$y184E3Ic0PiyOHcN$BguLDhU9rb6uqv6P.g/22ViZnzapXM5ukg/zYASxA3zB43gx30XG73OGZhEt07GSKc4RIsefMcaSNsoXmrqxI1",
+				},
+			},
 		}
+
+		ud, err := userdata.render()
+		if err != nil {
+			return nodes, err
+		}
+
 		serverName := fmt.Sprintf("%s.%s.%s", srv.ID, i.Configuration.ClusterName, "infraunlimited.tech")
 
 		args := &hcloud.ServerArgs{
 			ServerType: pulumi.String(srv.ServerType),
 			Location:   pulumi.String(srv.Location),
 			Name:       pulumi.String(serverName),
-			UserData: i.sshCreds.ApplyT(func(v interface{}) string {
-				m := v.(map[string]interface{})
-				userdata.Users = []*UserCloudConfig{
-					{
-						Name: m["user"].(string),
-						Sudo: "ALL=(ALL) NOPASSWD:ALL",
-						SSHAuthorizedKeys: []string{
-							m["publickey"].(string),
-						},
-						// Need to be encrypted
-						// k3s4ever
-						Passwd: "$6$y184E3Ic0PiyOHcN$BguLDhU9rb6uqv6P.g/22ViZnzapXM5ukg/zYASxA3zB43gx30XG73OGZhEt07GSKc4RIsefMcaSNsoXmrqxI1",
-					},
-				}
-				rendered, _ := userdata.render()
-				return rendered
-			}).(pulumi.StringOutput),
+			UserData:   pulumi.String(ud),
 		}
 
 		switch image := srv.Image; image {

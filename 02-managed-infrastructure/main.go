@@ -9,6 +9,8 @@ import (
 	"managed-infrastructure/providers/yandex"
 
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
+
+	"github.com/mitchellh/mapstructure"
 )
 
 func main() {
@@ -21,7 +23,30 @@ func main() {
 			return err
 		}
 
-		sshCreds := identityStack.GetOutput(pulumi.String("identity:ssh:server_access:credentials"))
+		sshOutput, err := identityStack.GetOutputDetails("identity:ssh:server_access:credentials")
+		if err != nil {
+			return err
+		}
+
+		// Will panic if not right type coz there is no way to procced.
+		// Panic error will be catched by pulumi and will be shown in the output
+		sshCredsMap := sshOutput.SecretValue.(map[string]interface{})
+
+		sshCreds := make(map[string]string)
+		dconfig := &mapstructure.DecoderConfig{
+			WeaklyTypedInput: true,
+			Result:           &sshCreds,
+		}
+
+		decoder, err := mapstructure.NewDecoder(dconfig)
+		if err != nil {
+			return err
+		}
+
+		err = decoder.Decode(sshCredsMap)
+		if err != nil {
+			return err
+		}
 
 		var i infra.ComputeInfra
 		switch cfg.Main.Providers.Compute {

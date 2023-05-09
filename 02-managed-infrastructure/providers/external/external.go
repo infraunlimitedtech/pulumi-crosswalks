@@ -1,10 +1,6 @@
 package external
 
-import (
-	"managed-infrastructure/utils"
-
-	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
-)
+import "github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 
 type Infra struct {
 	nodes map[string]map[string]interface{}
@@ -17,15 +13,15 @@ type Machine struct {
 	IP string
 }
 
-func Init(sshCreds pulumi.Output, config *ComputeConfig) *Infra {
+func Init(sshCreds map[string]string, config *ComputeConfig) *Infra {
 	nodes := make(map[string]map[string]interface{})
 
 	for _, node := range *config {
 		nodes[node.ID] = map[string]interface{}{
 			"id":       node.ID,
 			"provider": "static",
-			"key":      utils.ExtractFromExportedMap(sshCreds, "privatekey"),
-			"user":     utils.ExtractFromExportedMap(sshCreds, "user"),
+			"key":      pulumi.ToSecret(sshCreds["privatekey"]),
+			"user":     sshCreds["user"],
 			"ip":       node.IP,
 		}
 	}

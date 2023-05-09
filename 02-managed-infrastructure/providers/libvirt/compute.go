@@ -2,7 +2,6 @@ package libvirt
 
 import (
 	"fmt"
-	"managed-infrastructure/utils"
 
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
@@ -47,7 +46,7 @@ type ComputedInfra struct {
 	nodes map[string]map[string]interface{}
 }
 
-func ManageCompute(ctx *pulumi.Context, sshCreds pulumi.Output, cfg *ComputeConfig) (*ComputedInfra, error) {
+func ManageCompute(ctx *pulumi.Context, sshCreds map[string]string, cfg *ComputeConfig) (*ComputedInfra, error) {
 	nodes := make(map[string]map[string]interface{})
 	fmt.Println(len(cfg.Hypevisors))
 	for _, hypevisor := range cfg.Hypevisors {
@@ -57,8 +56,8 @@ func ManageCompute(ctx *pulumi.Context, sshCreds pulumi.Output, cfg *ComputeConf
 		}
 
 		for k, v := range computedInfo {
-			v["key"] = utils.ExtractFromExportedMap(sshCreds, "privatekey")
-			v["user"] = utils.ExtractFromExportedMap(sshCreds, "user")
+			v["key"] = pulumi.ToSecret(sshCreds["private_key"])
+			v["user"] = sshCreds["user"]
 			nodes[k] = v
 		}
 	}
