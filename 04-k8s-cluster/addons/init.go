@@ -19,11 +19,21 @@ type Addons struct {
 }
 
 type Monitoring struct {
-	NodeExporter *NodeExporter
+	NodeExporter    *NodeExporter
+	VictoriaMetrics *VictoriaMetrics
 }
 
 type NodeExporter struct {
 	Helm *HelmParams
+}
+
+type VictoriaMetrics struct {
+	Helm   *HelmParams
+	Server *VictoriaMetricsServer
+}
+
+type VictoriaMetricsServer struct {
+	ClusterIP string
 }
 
 type MetalLb struct {
@@ -139,13 +149,9 @@ func Init(ctx *pulumi.Context, s *spec.ClusterSpec) (*Addons, error) {
 			Helm:    pulumiAddonsCfg.NginxIngress.Helm,
 			KubeAPI: pulumiAddonsCfg.NginxIngress.KubeAPI,
 		},
-		Monitoring: &Monitoring{
-			NodeExporter: &NodeExporter{
-				Helm: pulumiAddonsCfg.Monitoring.NodeExporter.Helm,
-			},
-		},
-		MetalLb: pulumiAddonsCfg.MetalLb,
-		Kilo:    pulumiAddonsCfg.Kilo,
+		Monitoring: pulumiAddonsCfg.Monitoring,
+		MetalLb:    pulumiAddonsCfg.MetalLb,
+		Kilo:       pulumiAddonsCfg.Kilo,
 	}
 	return a, nil
 }

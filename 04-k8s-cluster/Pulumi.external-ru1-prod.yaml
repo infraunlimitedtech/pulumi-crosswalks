@@ -1,6 +1,11 @@
 config:
   k8s-cluster:addons:
     monitoring:
+      victoriaMetrics:
+        helm:
+          version: 0.8.59
+        server:
+          clusterIp: 10.91.1.20
       nodeExporter:
         helm:
           version: 4.17.2

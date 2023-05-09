@@ -12,14 +12,14 @@ import (
 func (m *Stack) runVM() error {
 	appName := "victoria-metrics"
 
-	_, err := helmv3.NewRelease(m.ctx, appName, &helmv3.ReleaseArgs{
+	deployed, err := helmv3.NewRelease(m.ctx, appName, &helmv3.ReleaseArgs{
 		Name:      pulumi.String(appName),
 		Chart:     pulumi.String("victoria-metrics-single"),
 		Namespace: m.Namespace.Metadata.Name().Elem(),
 		RepositoryOpts: helmv3.RepositoryOptsArgs{
 			Repo: pulumi.String("https://victoriametrics.github.io/helm-charts"),
 		},
-		Version: pulumi.String("0.8.59"),
+		Version: pulumi.String(m.VictoriaMetrics.Helm.Version),
 		Values: pulumi.Map{
 			"server": pulumi.Map{
 				"scrape": pulumi.Map{
@@ -62,9 +62,9 @@ func (m *Stack) runVM() error {
 				"app.kubernetes.io/instance": pulumi.String(appName),
 			},
 			Type:      pulumi.String("ClusterIP"),
-			ClusterIP: pulumi.String("10.91.1.20"),
+			ClusterIP: pulumi.String(m.VictoriaMetrics.Server.ClusterIP),
 		},
-	})
+	}, pulumi.DependsOn([]pulumi.Resource{deployed}))
 
 	if err != nil {
 		return fmt.Errorf("k8s service: %w", err)

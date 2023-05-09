@@ -451,8 +451,8 @@ func (k *StartedKilo) GetRequiredFirewallRules() []utils.FirewallRule {
 	rules := make([]utils.FirewallRule, 0)
 
 	if k.Firewalls.Hetzner != nil && k.Firewalls.Hetzner.Managed {
-		for i, hrule := range hetznerFirewallRules {
-			rules[i] = hrule
+		for _, hrule := range hetznerFirewallRules {
+			rules = append(rules, hrule)
 		}
 	}
 

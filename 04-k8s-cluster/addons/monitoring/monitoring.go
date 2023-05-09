@@ -10,9 +10,10 @@ import (
 )
 
 type Stack struct {
-	ctx          *pulumi.Context
-	Namespace    *corev1.Namespace
-	NodeExporter *addons.NodeExporter
+	ctx             *pulumi.Context
+	Namespace       *corev1.Namespace
+	NodeExporter    *addons.NodeExporter
+	VictoriaMetrics *addons.VictoriaMetrics
 }
 
 func Run(ctx *pulumi.Context, params *addons.Monitoring) error {
@@ -30,9 +31,10 @@ func Run(ctx *pulumi.Context, params *addons.Monitoring) error {
 
 	// Setup node-exporter
 	mon := &Stack{
-		ctx:          ctx,
-		Namespace:    ns,
-		NodeExporter: params.NodeExporter,
+		ctx:             ctx,
+		Namespace:       ns,
+		VictoriaMetrics: params.VictoriaMetrics,
+		NodeExporter:    params.NodeExporter,
 	}
 
 	err = mon.runNodeExporter()
