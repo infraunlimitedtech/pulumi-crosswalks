@@ -1,0 +1,33 @@
+config:
+  hcloud:token:
+    secure: AAABAAtia04SR5ro6sRjWcQVcTUbqEZ0xQBiJlWckXzh9ENoRATqT6agsPKijNkLcYlDM/MeR/cl/W0jFQMuciVa47RBuLcGg0Ct5Yqmvs5remLq342ey54GQtOKE3d6
+  managed-infrastructure:compute:
+    hetzner:
+      configuration:
+        firewall:
+          - name: hetzner-ru1-dev-managed-infra
+            rules:
+              - description: ping from anywhere
+                protocol: icmp
+                sourceIps:
+                  - ::/0
+                  - 0.0.0.0/0
+              - description: ssh from anywhere
+                port: "22"
+                protocol: tcp
+                sourceIps:
+                  - ::/0
+                  - 0.0.0.0/0
+        servers:
+          defaults:
+            image: automation-api
+            server_type: cx21
+          machines:
+#          - id: k3s-server02
+  managed-infrastructure:main:
+    identitystack: spigell/identity/prod
+    providers:
+      compute: hetzner
+      s3: yandex
+  managed-infrastructure:s3:
+    yandex: {}
