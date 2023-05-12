@@ -6,6 +6,7 @@ import (
 	"k8s-cluster/infra/firewall"
 	"k8s-cluster/rbac"
 	"k8s-cluster/rbac/sa"
+	"k8s-cluster/services"
 	"k8s-cluster/spec"
 
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
@@ -35,6 +36,18 @@ func main() {
 		kubeClusterAddons, err := addons.Init(ctx, kubeClusterSpec)
 		if err != nil {
 			return err
+		}
+
+		kubeClusterServices, err := services.Init(ctx)
+		if err != nil {
+			return err
+		}
+
+		if kubeClusterServices.KiloVPN.IsEnabled() {
+			_, err = kubeClusterServices.RunKiloVPN()
+			if err != nil {
+				return err
+			}
 		}
 
 		if err := kubeClusterAddons.RunMetricServer(); err != nil {

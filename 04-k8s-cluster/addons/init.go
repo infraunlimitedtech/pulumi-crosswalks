@@ -1,18 +1,20 @@
 package addons
 
 import (
+	"k8s-cluster/config"
+	"k8s-cluster/packages/kilo"
 	"k8s-cluster/spec"
 
 	corev1 "github.com/pulumi/pulumi-kubernetes/sdk/v3/go/kubernetes/core/v1"
 	metav1 "github.com/pulumi/pulumi-kubernetes/sdk/v3/go/kubernetes/meta/v1"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
-	"github.com/pulumi/pulumi/sdk/v3/go/pulumi/config"
+	pulumiConfig "github.com/pulumi/pulumi/sdk/v3/go/pulumi/config"
 )
 
 type Addons struct {
 	ctx          *pulumi.Context
 	Namespace    *corev1.Namespace
-	Kilo         *Kilo
+	Kilo         *kilo.Kilo
 	MetalLb      *MetalLb
 	NginxIngress *NginxIngress
 	Monitoring   *Monitoring
@@ -24,11 +26,11 @@ type Monitoring struct {
 }
 
 type NodeExporter struct {
-	Helm *HelmParams
+	Helm *config.HelmParams
 }
 
 type VictoriaMetrics struct {
-	Helm   *HelmParams
+	Helm   *config.HelmParams
 	Server *VictoriaMetricsServer
 }
 
@@ -37,7 +39,7 @@ type VictoriaMetricsServer struct {
 }
 
 type MetalLb struct {
-	Helm               *HelmParams
+	Helm               *config.HelmParams
 	Pools              *MetalLbPools
 	DefaultNetworkPool string
 	ExternalIP         string
@@ -58,43 +60,11 @@ type NginxIngress struct {
 	Domain  string
 	KubeAPI NginxKubeAPI
 	Replica int
-	Helm    *HelmParams
+	Helm    *config.HelmParams
 }
 
 type NginxKubeAPI struct {
 	ClusterIP string
-}
-
-type Kilo struct {
-	PrivateKey  string
-	Crds        *CRDS
-	Version     string
-	Peers       []KiloPeer
-	Firewalls   *Firewalls
-	ExternalIPs []string
-}
-
-type KiloPeer struct {
-	Name       string
-	PublicKey  string
-	AllowedIPs []string
-}
-
-type HelmParams struct {
-	Version string
-}
-
-type CRDS struct {
-	Path string
-}
-
-type Firewalls struct {
-	Hetzner   *Firewall
-	Firewalld *Firewall
-}
-
-type Firewall struct {
-	Managed bool
 }
 
 func Init(ctx *pulumi.Context, s *spec.ClusterSpec) (*Addons, error) {
@@ -111,7 +81,7 @@ func Init(ctx *pulumi.Context, s *spec.ClusterSpec) (*Addons, error) {
 
 	// Init vars from stack's config
 	var pulumiAddonsCfg Addons
-	cfg := config.New(ctx, "")
+	cfg := pulumiConfig.New(ctx, "")
 	cfg.RequireSecretObject("addons", &pulumiAddonsCfg)
 
 	_, err = corev1.NewLimitRange(ctx, namespace, &corev1.LimitRangeArgs{

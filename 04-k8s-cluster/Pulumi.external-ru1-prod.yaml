@@ -1,16 +1,8 @@
 config:
   k8s-cluster:addons:
-    monitoring:
-      victoriaMetrics:
-        helm:
-          version: 0.8.59
-        server:
-          clusterIp: 10.91.1.20
-      nodeExporter:
-        helm:
-          version: 4.17.2
     kilo:
       crds:
+        install: true
         path: crds/sources/squat/kilo
       peers:
         - allowedIPs:
@@ -23,7 +15,16 @@ config:
           publicKey: BmpQi9li9lS4DXLNZXeR4YJUs0d/3J2HDXc/2hxarlA=
       privateKey:
         secure: AAABAE81G8vgYasDQhlhh4RTvN1R8uOcqWTw+RDt6wnNpy3/QjfoRYoxTIu0l8biTcE8GGkk7T4WWrYiyZ8hzfB4uMrT1ATXi5NJ/w==
-      version: 0.5.0
+      version: 0.6.0
+    monitoring:
+      nodeExporter:
+        helm:
+          version: 4.17.2
+      victoriaMetrics:
+        helm:
+          version: 0.8.59
+        server:
+          clusterIp: 10.91.1.20
     nginxIngress:
       helm:
         version: 0.16.2
@@ -35,5 +36,20 @@ config:
   k8s-cluster:rbac:
     serviceAccounts:
       prometheus: true
+  k8s-cluster:services:
+    kiloVpn:
+      crds:
+        install: false
+      firewalls:
+        hetzner:
+          managed: true
+      peers:
+        - allowedIPs:
+            - 10.40.10.1/32
+          name: spigell-lazyvpn
+          publicKey: fcO/N5O7sfUrTX43FaE+2iEV1+YaXWryXMmb7F8jxTE=
+      privateKey:
+        secure: AAABAE81G8vgYasDQhlhh4RTvN1R8uOcqWTw+RDt6wnNpy3/QjfoRYoxTIu0l8biTcE8GGkk7T4WWrYiyZ8hzfB4uMrT1ATXi5NJ/w==
+      version: 0.6.0
   k8s-cluster:spec:
     internalDomainZone: int.k3s.ru1.infraunlimited.tech

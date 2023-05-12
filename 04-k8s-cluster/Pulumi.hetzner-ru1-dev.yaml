@@ -1,9 +1,25 @@
 config:
   hcloud:token:
     secure: AAABAD4dM3tBE5l0uqVYcd/KeEsN+G8VyvR8CfmZR2Wm12NdQ5RzYlpToW+zShhm8yGmJJBODL+Br6m2dh9+w2VIvRA6AfAIN2Bcz1Tw/7z4YfRM8VYUS/6wDGNK0NGO
+  k8s-cluster:services:
+    kiloVpn:
+      crds:
+        install: false
+      firewalls:
+        hetzner:
+          managed: true
+      peers:
+        - allowedIPs:
+            - 10.10.10.1/32
+          name: spigell-lazyvpn
+          publicKey: fcO/N5O7sfUrTX43FaE+2iEV1+YaXWryXMmb7F8jxTE=
+      privateKey:
+        secure: AAABAKwq51XLF1YXNf6rBUasWbNvTymewszN/a6iDZmGRkksvmPLH3s1uAcith5g0SC01ASFWS3vtsu6dLd6JsjH8eUS7FhaU5hvoQ==
+      version: 0.6.0
   k8s-cluster:addons:
     kilo:
       crds:
+        install: true
         path: crds/sources/squat/kilo
       firewalls:
         hetzner:
