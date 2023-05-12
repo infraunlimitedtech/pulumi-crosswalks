@@ -48,6 +48,14 @@ config:
             - 10.40.10.1/32
           name: spigell-lazyvpn
           publicKey: fcO/N5O7sfUrTX43FaE+2iEV1+YaXWryXMmb7F8jxTE=
+        - allowedIPs:
+            - 10.40.10.2/32
+          name: lina-lazyvpn-1
+          publicKey: E+IBVsUUT02lhCfcVQliYhIVhOnqYy22pKSXr2jMH0o=
+        - allowedIPs:
+            - 10.40.10.3/32
+          name: lina-lazyvpn-2
+          publicKey: wTyro/UvqjGtP4ERPvuz2JK/JpE1QGJgbWSl0Rd6Ono=
       privateKey:
         secure: AAABAE81G8vgYasDQhlhh4RTvN1R8uOcqWTw+RDt6wnNpy3/QjfoRYoxTIu0l8biTcE8GGkk7T4WWrYiyZ8hzfB4uMrT1ATXi5NJ/w==
       version: 0.6.0
