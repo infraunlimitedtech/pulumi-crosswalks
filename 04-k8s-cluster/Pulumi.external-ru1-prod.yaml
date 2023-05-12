@@ -53,3 +53,4 @@ config:
       version: 0.6.0
   k8s-cluster:spec:
     internalDomainZone: int.k3s.ru1.infraunlimited.tech
+  kubernetes:context: external-ru1-prod
