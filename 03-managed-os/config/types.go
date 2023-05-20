@@ -48,6 +48,8 @@ type K3sConfig struct {
 	BindAddress               string   `json:"-" yaml:"bind-address,omitempty"`
 	ClusterInit               bool     `json:"-" yaml:"cluster-init,omitempty"`
 	NodeLabels                []string `json:"node-label" yaml:"node-label,omitempty"`
+	FlannelBackend            string   `json:"flannel-backend" yaml:"flannel-backend,omitempty"`
+	DisableNetworkPolicy      bool     `json:"disable-network-policy" yaml:"disable-network-policy,omitempty"`
 	NodeTaints                []string `json:"node-taint" yaml:"node-taint,omitempty"`
 	KubeleteArgs              []string `json:"kubelet-arg" yaml:"kubelet-arg,omitempty"`
 	KubeControllerManagerArgs []string `json:"kube-controller-manager-arg" yaml:"kube-controller-manager-arg,omitempty"`

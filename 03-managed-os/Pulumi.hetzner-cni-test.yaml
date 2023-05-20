@@ -1,0 +1,71 @@
+encryptionsalt: v1:0rKAgpMMVLA=:v1:Svx/Uex5uDAQg4BK:ts0ZizmDjFYJXIsP9nyh42TVNVcUKw==
+config:
+  hcloud:token:
+    secure: v1:n/QA5jBQLP0Hpox5:PGZufClsGG3sTFu2hgIGQY8m4vumLd4ctTjYaKnl25Ac+Ue2aTM0vU0KWsvjrq0YOs2Z+UILDu++XfDVVzInC1ArhBwYc6D23rvTwD5sxqI=
+  managed-os:main:
+    defaults:
+      agents:
+        k3s:
+          config:
+            kubelet-arg:
+              - node-status-update-frequency=20s
+              - system-reserved=cpu=100m,memory=100Mi
+      global:
+        firewall:
+          firewalld:
+            enabled: false
+          hetzner:
+            - name: hetzner-cni-test-managed-os
+              rules:
+                - description: for wireguard interconnect
+                  port: "51822"
+                  protocol: udp
+                  sourceIps:
+                    - 0.0.0.0/0
+                    - ::/0
+        k3s:
+          config:
+            token: token
+          version: v1.27.1+k3s1
+        wireguard:
+          cidr: 192.168.180.0/24
+          firewall:
+            firewalld:
+              allowed: true
+      servers:
+        k3s:
+          config:
+            cluster-cidr: 10.50.0.0/16
+            cluster-dns: 10.51.0.10
+            cluster-domain: hetzner-cni-test.intra.infraunlimited.tech
+            # Setup cillium
+            flannel-backend: none
+            disable-network-policy: true
+            disable:
+              # cillium can run without kube-proxy
+              - kube-proxy
+              - metrics-server
+              - traefik
+              - servicelb
+            disable-cloud-controller: true
+            kube-apiserver-arg:
+              - default-not-ready-toleration-seconds=60
+              - default-unreachable-toleration-seconds=60
+            kube-controller-manager-arg:
+              - node-monitor-grace-period=2m
+            kubelet-arg:
+              - node-status-update-frequency=20s
+              - system-reserved=cpu=1,memory=1Gi
+            node-taint:
+              - CriticalAddonsOnly=true:NoExecute
+              - node-role.kubernetes.io/control-plane:NoSchedule
+            service-cidr: 10.51.0.0/16
+    id_stack: spigell/identity/local
+    infra_stack: spigell/managed-infrastructure/hetzner-cni-test
+    nodes:
+      agents:
+        - id: agent-cni-01
+        - id: agent-cni-02
+      servers:
+        - id: server-cni-01
+          leader: true
