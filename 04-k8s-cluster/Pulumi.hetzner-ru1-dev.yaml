@@ -1,21 +1,7 @@
+encryptionsalt: v1:l4P2TFYrQK8=:v1:OK4ACw+qA9jEsj4Z:00/6NvKfm8vjWmHz6gxvJ4KjZu/nwg==
 config:
   hcloud:token:
-    secure: AAABAD4dM3tBE5l0uqVYcd/KeEsN+G8VyvR8CfmZR2Wm12NdQ5RzYlpToW+zShhm8yGmJJBODL+Br6m2dh9+w2VIvRA6AfAIN2Bcz1Tw/7z4YfRM8VYUS/6wDGNK0NGO
-  k8s-cluster:services:
-    kiloVpn:
-      crds:
-        install: false
-      firewalls:
-        hetzner:
-          managed: true
-      peers:
-        - allowedIPs:
-            - 10.10.10.1/32
-          name: spigell-lazyvpn
-          publicKey: fcO/N5O7sfUrTX43FaE+2iEV1+YaXWryXMmb7F8jxTE=
-      privateKey:
-        secure: AAABAKwq51XLF1YXNf6rBUasWbNvTymewszN/a6iDZmGRkksvmPLH3s1uAcith5g0SC01ASFWS3vtsu6dLd6JsjH8eUS7FhaU5hvoQ==
-      version: 0.6.0
+    secure: v1:ByUltMSp326U43yU:jAxsddKxJQvf2Q++amAAZQeKnyuGw7y3tmf3U+LoSAjpvMN0hVB/pDibvg9W37GXx7RUBGixZICVc6d+DWAEgYMaQEl/dDd700zAxmeqGwI=
   k8s-cluster:addons:
     kilo:
       crds:
@@ -34,17 +20,21 @@ config:
           name: external-prometheus
           publicKey: BmpQi9li9lS4DXLNZXeR4YJUs0d/3J2HDXc/2hxarlA=
       privateKey:
-        secure: AAABAKwq51XLF1YXNf6rBUasWbNvTymewszN/a6iDZmGRkksvmPLH3s1uAcith5g0SC01ASFWS3vtsu6dLd6JsjH8eUS7FhaU5hvoQ==
-      version: 0.5.0
+        secure: v1:f5uMHAzI2VPCRSxq:pfkyGOAlrVc0ehHBmMJ4AWwCSf3Q6EuXz+5yzkATTPonNxd6CdMvsImnT9l9kC5Hp/y/+AiON/bzfn6y
+      version: 0.6.0
     monitoring:
+      nodeExporter:
+        helm:
+          version: 4.17.2
       victoriaMetrics:
         helm:
           version: 0.8.59
         server:
           clusterIp: 10.101.1.20
-      nodeExporter:
+      vmAlert:
+        enabled: false
         helm:
-          version: 4.17.2
+          version: 0.5.23
     nginxIngress:
       helm:
         version: 0.16.2
@@ -56,5 +46,22 @@ config:
   k8s-cluster:rbac:
     serviceAccounts:
       prometheus: true
+  k8s-cluster:services:
+    kiloVpn:
+      enabled: false
+      crds:
+        install: false
+      firewalls:
+        hetzner:
+          managed: true
+      peers:
+        - allowedIPs:
+            - 10.10.10.1/32
+          name: spigell-lazyvpn
+          publicKey: fcO/N5O7sfUrTX43FaE+2iEV1+YaXWryXMmb7F8jxTE=
+      privateKey:
+        secure: v1:Qnfc+KK3JkjFRfDT:l5Ai0kpSDj1sh4KBqIv45DcE+VRw+rPhXzLuAe///TNxfXcq8swTURb19F+XpqInpoppHHZU/XYxlA76
+      version: 0.6.0
   k8s-cluster:spec:
     internalDomainZone: int.dev.k3s.ru1.infraunlimited.tech
+  kubernetes:context: hetzner-ru1-dev-direct

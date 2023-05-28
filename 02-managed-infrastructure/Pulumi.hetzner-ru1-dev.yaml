@@ -1,6 +1,7 @@
+encryptionsalt: v1:/FcisC+Adxs=:v1:X08wua6FLWbD0y7I:poPj3iYB+mS6hVZKtbU6MWZwZkOIuQ==
 config:
   hcloud:token:
-    secure: AAABAAtia04SR5ro6sRjWcQVcTUbqEZ0xQBiJlWckXzh9ENoRATqT6agsPKijNkLcYlDM/MeR/cl/W0jFQMuciVa47RBuLcGg0Ct5Yqmvs5remLq342ey54GQtOKE3d6
+    secure: v1:WUtI8nYd3FE/6tiA:kEwAzUdS+aZ+IL0497RtvLjAIIP3R8Cx++fVnMf8hwuPRBU4+8laxGfQmp5Ahot1g+fnUGZZ38lMVn2IOxxuzljln+gwvrU2pbsxTaDW4Xo=
   managed-infrastructure:compute:
     hetzner:
       configuration:
@@ -23,7 +24,7 @@ config:
             image: automation-api
             server_type: cx21
           machines:
-#          - id: k3s-server02
+            - id: k3s-server02
   managed-infrastructure:main:
     identitystack: spigell/identity/prod
     providers:

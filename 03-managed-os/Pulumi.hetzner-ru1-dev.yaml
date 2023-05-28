@@ -1,6 +1,7 @@
+encryptionsalt: v1:kPiU/giZoG0=:v1:OtwjU34SH7NGoYJL:aFOROT2enAEEqVABuzNoycwpGXNkHA==
 config:
   hcloud:token:
-    secure: AAABAFyLvvk2iHnkWrzE8Pr7KoqaYD50/Zf5try5RvQ/YA1o7OGV+Iqr+r8qkffx7Ogj1MoWIZugGVstchDzHjZP4X/adLkdf2xVOzWXDKlgEheoKTHPGpbMmtxr3KPq
+    secure: v1:ciaIOSdBqfADLgDE:hNKY+4s4q0+es97JXVeUjk2+E3RrztFDVArcwvOtbbdTDWi+rvjUV4r8Wz5Uf7kpReyKChpjrud39TZo+qj3o3yiVcvxnKItLD41zy+Rob0=
   managed-os:main:
     defaults:
       agents:
@@ -13,12 +14,6 @@ config:
         firewall:
           firewalld:
             enabled: false
-            internalZone:
-              restrictToSources:
-                - cidr: 45.14.15.131/32
-                  name: infra-gw
-            publicZone:
-              removeSSHService: true
           hetzner:
             - name: hetzner-ru1-dev-managed-os
               rules:
@@ -31,7 +26,7 @@ config:
         k3s:
           config:
             token: token
-          version: v1.26.4+k3s1
+          version: v1.27.2+k3s1
         wireguard:
           cidr: 192.168.110.0/24
           firewall:
