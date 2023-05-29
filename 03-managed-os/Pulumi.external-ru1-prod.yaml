@@ -21,7 +21,7 @@ config:
           config:
             token:
               secure: AAABABAZZ0pm0CTsdVQuRXjrAWW9+r4P8oLt+CwZdS6nookmy4J76aPKiCJ3Tg+gaEBh
-          version: v1.26.4+k3s1
+          version: v1.27.2+k3s1
         wireguard:
           cidr: 192.168.90.0/24
           firewall:
