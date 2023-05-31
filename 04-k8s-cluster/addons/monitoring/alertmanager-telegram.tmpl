@@ -1,0 +1,13 @@
+{{ define "telegram.infra.message" }}
+{{ if eq .Status "firing"}}🔥 <b>{{ .Status | toUpper }}</b> 🔥{{ else }}<b>{{ .Status | toUpper }}</b>{{ end }}
+{{ range .Alerts }}
+<b>Summary: {{ .Annotations.summary }}</b>
+<b>Description:</b> {{ .Annotations.description }}
+<b>Group:</b> {{ .Labels.job }}
+<b>Severity:</b> {{ .Labels.severity }}
+<b>Instance:</b> {{ .Labels.instance }}
+<b>Started:</b> {{ .StartsAt }}
+<b>Ended:</b> {{ .EndsAt }}
+<b>Status:</b> {{ if eq .Status "firing"}}🔥{{ else }}👌{{ end }}
+{{ end }}
+{{ end }}

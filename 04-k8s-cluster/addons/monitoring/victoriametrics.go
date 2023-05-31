@@ -9,8 +9,11 @@ import (
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
 
+const vmPort = 8428
+
 func (m *Stack) runVM() error {
 	appName := "victoria-metrics"
+	m.VictoriaMetrics.Server.Port = vmPort
 
 	deployed, err := helmv3.NewRelease(m.ctx, appName, &helmv3.ReleaseArgs{
 		Name:      pulumi.String(appName),
@@ -24,6 +27,11 @@ func (m *Stack) runVM() error {
 			"server": pulumi.Map{
 				"scrape": pulumi.Map{
 					"enabled": pulumi.Bool(true),
+					"config": pulumi.Map{
+						"global": pulumi.Map{
+							"scrape_interval": pulumi.String("60s"),
+						},
+					},
 				},
 				"tolerations": pulumi.MapArray{
 					pulumi.Map{
@@ -54,8 +62,8 @@ func (m *Stack) runVM() error {
 			Ports: corev1.ServicePortArray{
 				corev1.ServicePortArgs{
 					Name:       pulumi.String("http"),
-					Port:       pulumi.Int(8428),
-					TargetPort: pulumi.Int(8428),
+					Port:       pulumi.Int(m.VictoriaMetrics.Server.Port),
+					TargetPort: pulumi.Int(m.VictoriaMetrics.Server.Port),
 				},
 			},
 			Selector: pulumi.StringMap{

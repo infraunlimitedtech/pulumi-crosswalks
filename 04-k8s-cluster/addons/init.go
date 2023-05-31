@@ -23,6 +23,7 @@ type Addons struct {
 type Monitoring struct {
 	NodeExporter    *NodeExporter
 	VictoriaMetrics *VictoriaMetrics
+	VMAlert         *VMAlert
 }
 
 type NodeExporter struct {
@@ -34,8 +35,24 @@ type VictoriaMetrics struct {
 	Server *VictoriaMetricsServer
 }
 
+type VMAlert struct {
+	Enabled      *config.Status
+	Alertmanager *VMAlertAlertmanager
+	Helm         *config.HelmParams
+}
+
+type VMAlertAlertmanager struct {
+	Telegram *VMAlertAlertmanagerTelegram
+}
+
+type VMAlertAlertmanagerTelegram struct {
+	Token  string
+	ChatID string
+}
+
 type VictoriaMetricsServer struct {
 	ClusterIP string
+	Port      int
 }
 
 type MetalLb struct {

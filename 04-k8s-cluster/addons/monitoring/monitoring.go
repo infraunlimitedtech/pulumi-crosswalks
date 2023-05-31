@@ -14,6 +14,7 @@ type Stack struct {
 	Namespace       *corev1.Namespace
 	NodeExporter    *addons.NodeExporter
 	VictoriaMetrics *addons.VictoriaMetrics
+	VMAlert         *addons.VMAlert
 }
 
 func Run(ctx *pulumi.Context, params *addons.Monitoring) error {
@@ -35,6 +36,7 @@ func Run(ctx *pulumi.Context, params *addons.Monitoring) error {
 		Namespace:       ns,
 		VictoriaMetrics: params.VictoriaMetrics,
 		NodeExporter:    params.NodeExporter,
+		VMAlert:         params.VMAlert,
 	}
 
 	err = mon.runNodeExporter()
@@ -44,7 +46,14 @@ func Run(ctx *pulumi.Context, params *addons.Monitoring) error {
 
 	err = mon.runVM()
 	if err != nil {
-		return fmt.Errorf("victoria-metrics %w", err)
+		return fmt.Errorf("victoria-metrics: %w", err)
+	}
+
+	if mon.VMAlert.Enabled.WithDefault(true) {
+		err = mon.runVMAlert()
+		if err != nil {
+			return fmt.Errorf("victoria-metrics-alert: %w", err)
+		}
 	}
 
 	return nil

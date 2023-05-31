@@ -32,7 +32,11 @@ config:
         server:
           clusterIp: 10.101.1.20
       vmAlert:
-        enabled: false
+        alertmanager:
+          telegram:
+            chatID: '-335072949'
+            token:
+              secure: v1:EXp46qmPw47cLGEo:yGQ3UFXnbo9I2EXiO9kZAw5VQP7u7OeKSEvgQOGhVzKDMh+ytfrQQDnz4zUxWiedB3rY3h9OuK80umi7eQ==
         helm:
           version: 0.5.23
     nginxIngress:
@@ -48,9 +52,9 @@ config:
       prometheus: true
   k8s-cluster:services:
     kiloVpn:
-      enabled: false
       crds:
         install: false
+      enabled: false
       firewalls:
         hetzner:
           managed: true

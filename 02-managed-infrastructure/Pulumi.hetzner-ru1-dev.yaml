@@ -24,7 +24,7 @@ config:
             image: automation-api
             server_type: cx21
           machines:
-            - id: k3s-server02
+#            - id: k3s-server02
   managed-infrastructure:main:
     identitystack: spigell/identity/prod
     providers:

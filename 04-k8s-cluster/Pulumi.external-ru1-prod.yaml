@@ -25,6 +25,15 @@ config:
           version: 0.8.59
         server:
           clusterIp: 10.91.1.20
+      vmAlert:
+        alertmanager:
+          telegram:
+            chatID:
+              secure: AAABAD9O/EPp+LFPNbFoWqhIVsdV0VBbTAwwVKdrOe9gFzdLYIgwFCq3
+            token:
+              secure: AAABAKSY5MjkZGs4BpKV3nBZewts21lzRYTjM1teMkKBEuBOq450xO/bGtzZ1Qru9rV2YjDC4B5/v6HqsW0sEjxkSVD2wyXtwbW9odc=
+        helm:
+          version: 0.5.23
     nginxIngress:
       helm:
         version: 0.16.2
