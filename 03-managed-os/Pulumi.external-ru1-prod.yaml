@@ -57,3 +57,4 @@ config:
       servers:
         - id: pq-prod-ru1-server01
           leader: true
+        - id: pq-prod-ru1-server02
