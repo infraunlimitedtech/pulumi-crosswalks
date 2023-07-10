@@ -1,8 +1,6 @@
 config:
   managed-infrastructure:compute:
     external:
-      - id: pq-prod-ru1-server01
-        ip: 45.150.64.88
       - id: pq-prod-ru1-server02
         ip: 94.131.113.147
   managed-infrastructure:main:
