@@ -55,5 +55,6 @@ config:
     nodes:
       agents: []
       servers:
+        - id: pq-prod-ru1-server01
         - id: pq-prod-ru1-server02
           leader: true
