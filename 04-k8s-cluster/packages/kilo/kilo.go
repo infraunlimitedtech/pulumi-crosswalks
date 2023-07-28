@@ -219,8 +219,25 @@ cp secrets/* /var/lib/kilo/`),
 							Operator: pulumi.String("Exists"),
 						},
 					},
-					NodeSelector: pulumi.StringMap{
-						"node-role.kubernetes.io/master": pulumi.String("true"),
+					Affinity: &corev1.AffinityArgs{
+						NodeAffinity: &corev1.NodeAffinityArgs{
+							PreferredDuringSchedulingIgnoredDuringExecution: corev1.PreferredSchedulingTermArray{
+								&corev1.PreferredSchedulingTermArgs{
+									Weight: pulumi.Int(1),
+									Preference: &corev1.NodeSelectorTermArgs{
+										MatchExpressions: corev1.NodeSelectorRequirementArray{
+											&corev1.NodeSelectorRequirementArgs{
+												Key:      pulumi.String("infraunlimited.tech/kilo-vpn-node"),
+												Operator: pulumi.String("In"),
+												Values: pulumi.StringArray{
+													pulumi.String("true"),
+												},
+											},
+										},
+									},
+								},
+							},
+						},
 					},
 					ServiceAccountName: serviceAccount.Metadata.Name().Elem(),
 					HostNetwork:        pulumi.Bool(false),
