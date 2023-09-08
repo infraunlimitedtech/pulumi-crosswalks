@@ -53,12 +53,10 @@ config:
     id_stack: spigell/identity/prod
     infra_stack: spigell/managed-infrastructure/external-ru1-prod
     nodes:
-      agents:
-        - id: pq-prod-ru1-server01
+      servers:
+        - id: pq-prod-ru1-server02
+          leader: true
           k3s:
             config:
               node-label:
                 - infraunlimited.tech/kilo-vpn-node=true
-      servers:
-        - id: pq-prod-ru1-server02
-          leader: true
