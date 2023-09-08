@@ -91,7 +91,7 @@ func (m *Manager) ProcessEvents(events []events.EngineEvent, dryRun bool) error 
 }
 
 func (m *Manager) makeSnapshot(id string) error {
-	timeout := 2 * time.Minute
+	timeout := 20 * time.Minute
 	ctx, cancel := context.WithTimeout(m.ctx, timeout)
 	defer cancel()
 
