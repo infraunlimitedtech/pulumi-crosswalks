@@ -1,0 +1,3 @@
+stack:
+  name: hetzner-deckhouse
+  path: ../../02-managed-infrastructure

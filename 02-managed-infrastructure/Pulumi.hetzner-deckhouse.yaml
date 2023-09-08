@@ -1,0 +1,54 @@
+encryptionsalt: v1:+4PVjc/tUGM=:v1:j4+B8QqlK+08nMuT:M64kJOeQG51kunkeLiPqoPhq86V7DA==
+config:
+  hcloud:token:
+    secure: v1:lORSuOvYCneFKtfH:UkhuywsOzUrJZwIzZAuY74eS+2SbJjGXNARx2C1PgSpyQXLtYxNK+vaP4NxlIuSMh+MNGWAGUNeXLGejQALuRp9yKzA50u09+TLISb75zao=
+  managed-infrastructure:compute:
+    hetzner:
+      configuration:
+        firewall:
+          - name: hetzner-deckhouse-managed-infra
+            rules:
+              - description: ping
+                protocol: icmp
+                sourceIps:
+                  - ::/0
+                  - 0.0.0.0/0
+              - description: ssh from anywhere
+                port: "22"
+                protocol: tcp
+                sourceIps:
+                  - ::/0
+                  - 0.0.0.0/0
+              - description: wg port
+                port: '46707'
+                protocol: udp
+                sourceIps:
+                  - ::/0
+                  - 0.0.0.0/0
+              - description: http
+                port: '80'
+                protocol: tcp
+                sourceIps:
+                  - ::/0
+                  - 0.0.0.0/0
+              - description: https
+                port: '443'
+                protocol: tcp
+                sourceIps:
+                  - ::/0
+                  - 0.0.0.0/0
+        servers:
+          defaults:
+            image: automation-api
+            server_type: cpx31
+          machines:
+            #- id: runner2
+            #- id: k8stage3
+            #- id: k8stage2
+  managed-infrastructure:main:
+    identitystack: spigell/identity/local
+    providers:
+      compute: hetzner
+      s3: yandex
+  managed-infrastructure:s3:
+    yandex: {}
