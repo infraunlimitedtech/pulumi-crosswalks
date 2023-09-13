@@ -1,0 +1,74 @@
+encryptionsalt: v1:OjGHy649+uc=:v1:6ZYQ77u3o/0C5nVc:sCQkdcvDwSDyNqTk81ZTaH9ElcmCOA==
+config:
+  k8s-cluster:addons:
+    kilo:
+      crds:
+        install: true
+        path: crds/sources/squat/kilo
+      peers:
+        - allowedIPs:
+            - 10.11.10.1/32
+          name: spigell
+          publicKey: vwhPDDQ+yurUmkjDhsQqmdTF98UfAf2uF4UdlJt/VFQ=
+        - allowedIPs:
+            - 10.11.10.2/32
+          name: external-prometheus
+          publicKey: BmpQi9li9lS4DXLNZXeR4YJUs0d/3J2HDXc/2hxarlA=
+      privateKey:
+        secure: v1:PVeog6MOvNGuyouB:+wELmuFSRkhbWGxcIcTOtFcB/ZHr8iYeT0yfhGxe5l3SQ7lC2EGd+2LGah2wvN/GoMbbsZpwSPeH+9PU
+      version: 0.6.0
+    monitoring:
+      nodeExporter:
+        helm:
+          version: 4.17.2
+      victoriaMetrics:
+        helm:
+          version: 0.8.59
+        server:
+          clusterIp: 10.121.1.20
+      vmAlert:
+        alertmanager:
+          telegram:
+            chatID:
+              secure: v1:WwMHW3MywPGJa3Z+:NV+oMTsA0CLvdxXt7hkdVezx4olVi8Rky0c=
+            token:
+              secure: v1:fW3u+UTPiO557bxG:AkJABo2af6ebUsoovLeGqkooVmNUYxVP8UWmO94N/TVedKk4s5z/pvQwC8pZSCZG3s4+xKm7ASiA0Xi1qg==
+        helm:
+          version: 0.5.23
+    nginxIngress:
+      helm:
+        version: 0.16.2
+      kubeapi:
+        clusterIp: 10.121.1.1
+      replica: 1
+  k8s-cluster:main:
+    infraStack: spigell/managed-infrastructure/external-eu1-prod
+  k8s-cluster:rbac:
+    serviceAccounts:
+      prometheus: true
+  k8s-cluster:services:
+    kiloVpn:
+      crds:
+        install: false
+      firewalls:
+        hetzner:
+          managed: true
+      peers:
+        - allowedIPs:
+            - 10.50.10.1/32
+          name: spigell-lazyvpn
+          publicKey: fcO/N5O7sfUrTX43FaE+2iEV1+YaXWryXMmb7F8jxTE=
+        - allowedIPs:
+            - 10.50.10.2/32
+          name: lina-lazyvpn-1
+          publicKey: E+IBVsUUT02lhCfcVQliYhIVhOnqYy22pKSXr2jMH0o=
+        - allowedIPs:
+            - 10.50.10.3/32
+          name: lina-lazyvpn-2
+          publicKey: wTyro/UvqjGtP4ERPvuz2JK/JpE1QGJgbWSl0Rd6Ono=
+      privateKey:
+        secure: v1:fPuUXIszQJz3QM6h:UfWgztciqYnuIZwsbSkAYRhv/ArFDI5dBXzwdQcy/bVEZl9AhGf1k6/x0kpOktBOPC7uthmz5N9y5far
+      version: 0.6.0
+  k8s-cluster:spec:
+    internalDomainZone: int.k3s.eu1.infraunlimited.tech
+  kubernetes:context: external-eu1-prod

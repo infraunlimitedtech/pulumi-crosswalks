@@ -1,0 +1,13 @@
+config:
+  managed-infrastructure:compute:
+    external:
+      - id: pq-prod-nl1-server01
+        ip: 178.23.190.26
+      - id: pq-prod-rs1-server01
+        ip: 193.57.139.62
+  managed-infrastructure:main:
+    identitystack: spigell/identity/prod
+    providers:
+      compute: external
+      s3: none
+  managed-infrastructure:s3: {}
