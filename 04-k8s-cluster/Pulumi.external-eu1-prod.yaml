@@ -55,17 +55,13 @@ config:
           managed: true
       peers:
         - allowedIPs:
-            - 10.50.10.1/32
-          name: spigell-lazyvpn
-          publicKey: fcO/N5O7sfUrTX43FaE+2iEV1+YaXWryXMmb7F8jxTE=
-        - allowedIPs:
             - 10.50.10.2/32
           name: lina-lazyvpn-1
           publicKey: E+IBVsUUT02lhCfcVQliYhIVhOnqYy22pKSXr2jMH0o=
         - allowedIPs:
-            - 10.50.10.3/32
-          name: lina-lazyvpn-2
-          publicKey: wTyro/UvqjGtP4ERPvuz2JK/JpE1QGJgbWSl0Rd6Ono=
+            - 10.50.10.10/32
+          name: mustafa-lazyvpn-1
+          publicKey: fUmR8kPYeYGQQxMqjgN0fVNkkHJCbKPswJ9FeBXqezM=
       privateKey:
         secure: v1:fPuUXIszQJz3QM6h:UfWgztciqYnuIZwsbSkAYRhv/ArFDI5dBXzwdQcy/bVEZl9AhGf1k6/x0kpOktBOPC7uthmz5N9y5far
       version: 0.6.0
