@@ -37,7 +37,7 @@ var (
 		"PrometheusAlertmanagerE2eDeadManSwitch",
 		"PrometheusAlertmanagerJobMissing",
 		"PrometheusJobMissing",
-		"PrometheusTimeserieCardinality",
+		"PrometheusTimeseriesCardinality",
 	}
 )
 
