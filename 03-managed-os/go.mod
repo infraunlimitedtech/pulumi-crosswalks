@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/BurntSushi/toml v1.3.2
 	github.com/imdario/mergo v0.3.16
-	github.com/pulumi/pulumi-command/sdk v0.6.0
+	github.com/pulumi/pulumi-command/sdk v0.8.2
 	github.com/pulumi/pulumi/sdk/v3 v3.81.0
 	github.com/spigell/pulumi-file/sdk v0.0.0-20220328220825-472428d2995c
 	github.com/stretchr/testify v1.8.2
