@@ -33,7 +33,7 @@ func (c *Cluster) install(deps []map[string]pulumi.Resource) (map[string]pulumi.
 			Create: pulumi.Sprintf("sudo mkdir -p %s && if [[ -e /usr/local/bin/k3s ]]; then restart=true; fi ; curl -sfL https://get.k3s.io | sudo -E sh - 2>&1 >> /tmp/k3s-pulumi.log && if [[ $restart ]]; then sudo systemctl restart k3s*; fi ",
 				path.Dir(cfgPath)),
 			Delete: pulumi.String("/usr/local/bin/k3s-killall.sh"),
-		}, pulumi.ReplaceOnChanges([]string{"create", "environment"}),
+		},
 			pulumi.DependsOn(utils.ConvertMapSliceToSliceByKey(deps, node.ID)),
 			pulumi.RetainOnDelete(!node.K3s.CleanDataOnUpgrade),
 		)
