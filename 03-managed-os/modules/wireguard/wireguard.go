@@ -158,6 +158,7 @@ func generateWgConfig(wgPeersOutput pulumi.AnyOutput, self *config.Node) pulumi.
 			for _, p := range self.Wireguard.AdditionalPeers {
 				additionalPeer := Peer{
 					PublicKey:  p.PublicKey,
+					Endpoint:   p.Endpoint,
 					AllowedIps: p.AllowedIps,
 				}
 				wgPeers = append(wgPeers, additionalPeer)
