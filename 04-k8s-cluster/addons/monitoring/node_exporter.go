@@ -30,6 +30,9 @@ func (m *Stack) runNodeExporter() error {
 					"effect":   pulumi.String("NoSchedule"),
 				},
 			},
+			"extraArgs": pulumi.StringArray{
+				pulumi.String("--collector.filesystem.ignored-mount-points=^/(dev|proc|sys|var/lib/kubelet/.+)($|/)"),
+			},
 			"service": pulumi.Map{
 				"annotations": pulumi.Map{
 					"prometheus.io/scrape": pulumi.String("true"),
