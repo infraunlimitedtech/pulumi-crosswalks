@@ -31,7 +31,7 @@ func (o *Cluster) Reboot(deps []map[string]pulumi.Resource) (map[string]pulumi.R
 		}
 
 		waited, _ := local.NewCommand(o.Ctx, fmt.Sprintf("%s-localWait", node.ID), &local.CommandArgs{
-			Create: pulumi.Sprintf("until nc -z %s 22; do sleep 5; done", utils.ExtractValueFromPulumiMapMap(o.InfraLayerNodeInfo, node.ID, "ip")),
+			Create: pulumi.Sprintf("sleep 120 && until nc -z %s 22; do sleep 5; done", utils.ExtractValueFromPulumiMapMap(o.InfraLayerNodeInfo, node.ID, "ip")),
 			Triggers: pulumi.Array{
 				rebooted,
 			},
