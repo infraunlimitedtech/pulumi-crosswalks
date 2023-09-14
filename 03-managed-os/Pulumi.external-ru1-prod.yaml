@@ -13,6 +13,10 @@ config:
             enabled: true
             internalZone:
               restrictToSources:
+                - cidr: 178.23.190.26/32
+                  name: eu-cluster
+                  # Will never delete the access
+                  main: true
                 - cidr: 45.14.15.131/32
                   name: infra-gw
             publicZone:
@@ -21,12 +25,19 @@ config:
           config:
             token:
               secure: AAABABAZZ0pm0CTsdVQuRXjrAWW9+r4P8oLt+CwZdS6nookmy4J76aPKiCJ3Tg+gaEBh
-          version: v1.27.2+k3s1
+          version: v1.27.5+k3s1
         wireguard:
           cidr: 192.168.90.0/24
           firewall:
             firewalld:
               allowed: true
+          additional_peers:
+            - allowed_ips:
+              - 192.168.120.0/24
+              - 10.120.0.0/16
+              - 10.121.0.0/16
+              endpoint: 178.23.190.26:51822
+              publicKey: /IgVJHO4JavZ+ha0H19/MLs5+pZd4ocLOxe2hP1B6nc=
       servers:
         k3s:
           config:
