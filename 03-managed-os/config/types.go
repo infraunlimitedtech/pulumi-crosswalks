@@ -76,6 +76,7 @@ type WGFirewalld struct {
 
 type AdditionalPeer struct {
 	AllowedIps []string `json:"allowed_ips" yaml:"allowed_ips"`
+	Endpoint   string
 	PublicKey  string
 }
 
@@ -97,6 +98,7 @@ type InternalZone struct {
 type RestrictToSource struct {
 	CIDR string
 	Name string
+	Main bool
 }
 
 type PublicZone struct {

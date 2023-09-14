@@ -1,43 +1,43 @@
 package firewalld
 
 import (
-	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 	"fmt"
 	"github.com/pulumi/pulumi-command/sdk/go/command/remote"
+	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
-
 
 type Rule interface{}
 
 type PortRule struct {
-	Name string
-	Protocol    string
-	Port        int
-	Zone        string
+	Name     string
+	Protocol string
+	Port     int
+	Zone     string
 }
 
 type InterfaceRule struct {
-	Name string
+	Name      string
 	Interface string
-	Zone        string
+	Zone      string
 }
 
 type SourceRule struct {
-	Name string
+	Name   string
 	Source string
-	Zone        string
+	Zone   string
+	Main   bool
 }
 
 type ServiceRule struct {
-	Name string
+	Name    string
 	Service string
-	Zone        string
+	Zone    string
 }
 
 var FirewalldSSHRule = &PortRule{
-	Name: "auto-port-to-internal:ssh",
-	Zone: "internal",
-	Port: 22,
+	Name:     "auto-port-to-internal:ssh",
+	Zone:     "internal",
+	Port:     22,
 	Protocol: "tcp",
 }
 
@@ -74,14 +74,21 @@ func (f *Firewalld) addRule(rule Rule) (pulumi.Resource, error) {
 		name = r.Name
 
 	case *SourceRule:
-		cmdCreate = fmt.Sprintf("sudo firewall-cmd --permanent --add-source=%s --zone=%s", r.Source, r.Zone)
-		cmdDelete = fmt.Sprintf("sudo firewall-cmd --permanent --remove-source=%s --zone=%s && %s", r.Source, r.Zone, reloadAfterDelete)
-		name = r.Name
+		switch r.Main {
+		case true:
+			cmdCreate = fmt.Sprintf("sudo firewall-cmd --permanent --add-source=%s --zone=%s", r.Source, r.Zone)
+			cmdDelete = fmt.Sprintf("echo Refuse delete main connection!")
+			name = r.Name
+
+		default:
+			cmdCreate = fmt.Sprintf("sudo firewall-cmd --permanent --add-source=%s --zone=%s", r.Source, r.Zone)
+			cmdDelete = fmt.Sprintf("sudo firewall-cmd --permanent --remove-source=%s --zone=%s && %s", r.Source, r.Zone, reloadAfterDelete)
+			name = r.Name
+		}
 
 	default:
 		return nil, fmt.Errorf("unknown rule type: %T with content %+v", r, r)
 	}
-
 
 	applied, err := remote.NewCommand(f.ctx, fmt.Sprintf("%s-ApplyFirewallRule-%s", f.NodeInfo.ID, name), &remote.CommandArgs{
 		Connection: &remote.ConnectionArgs{

@@ -47,6 +47,7 @@ func (f *FirewallCfg) Manage(deps []map[string]pulumi.Resource) error {
 						Name:   "auto-source-for-internal:" + source.Name,
 						Zone:   "internal",
 						Source: source.CIDR,
+						Main:   source.Main,
 					})
 				}
 			}
