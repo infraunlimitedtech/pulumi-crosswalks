@@ -1,0 +1,34 @@
+config:
+  hcloud:token:
+    secure: AAABAPfcn/avHHkRSQ15G5yizDpSLTD1TER7JkPOCIkeHLDIBBRpHfIEW2b2YGqDTFHuwNBFblUF7Ic1+zbPKOvuX5xmP+KbszoYJiUJ1ffcC1/3O01iHKVTbgcDAzaC
+  managed-infrastructure:compute:
+    hetzner:
+      configuration:
+        firewall:
+          - name: dev-eu1-managed-infra
+            rules:
+              - description: ping
+                protocol: icmp
+                sourceIps:
+                  - ::/0
+                  - 0.0.0.0/0
+              - description: ssh from anywhere
+                port: "22"
+                protocol: tcp
+                sourceIps:
+                  - ::/0
+                  - 0.0.0.0/0
+        servers:
+          defaults:
+            image: automation-api
+            server_type: cx21
+          machines:
+            - id: hz-dev-eu1-server01
+            - id: hz-dev-eu1-server02
+  managed-infrastructure:main:
+    identitystack: spigell/identity/local
+    providers:
+      compute: hetzner
+      s3: yandex
+  managed-infrastructure:s3:
+    yandex: {}

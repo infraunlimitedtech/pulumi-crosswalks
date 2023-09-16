@@ -1,0 +1,86 @@
+encryptionsalt: v1:jFfDJ8aSDG8=:v1:FOCmdHLpaoh5qZDR:JjsOFeGCDY2b/UkeoaAxWKjKrhSbsA==
+config:
+  hcloud:token:
+    secure: v1:hlJGt/v3Z1GCsqta:SZM34+inBCLCZLYfyxKA+hARBtsDI6NOdMUWuqGIdAA2URWr/18ihP71doJcfEs9Snw1B6vIIMEc8hne7OgQ9rVbYqSm/ORzNzPHv9EQ88w=
+  managed-os:main:
+    defaults:
+      agents:
+        k3s:
+          config:
+            kubelet-arg:
+              - node-status-update-frequency=20s
+              - system-reserved=cpu=100m,memory=100Mi
+      global:
+        firewall:
+          firewalld:
+            enabled: true
+            internalZone:
+              restrictToSources:
+                - cidr: 45.14.15.131/32
+                  name: infra-gw
+                - cidr: 94.131.113.147/32
+                  main: true
+                  name: ru-cluster
+            publicZone:
+              removeSSHService: true
+          hetzner:
+            - name: dev-eu1-managed-os
+              rules:
+                - description: wireguard interconnect
+                  port: "51822"
+                  protocol: udp
+                  sourceIps:
+                    - 0.0.0.0/0
+                    - ::/0
+        k3s:
+          config:
+            token:
+              secure: v1:nyZWiKH591Y/Kt0V:MfhvqTfq/gGBBQAHcurxdyYVsJKKw4BKCrTTk+Jb5Nu1wjA=
+          version: v1.27.5+k3s1
+        wireguard:
+          additional_peers:
+            - allowed_ips:
+                - 192.168.90.0/24
+                - 10.90.0.0/16
+                - 10.91.0.0/16
+              endpoint: 94.131.113.147:51822
+              publicKey: m1zo2ztOGDs5QaX0K/xMNgsUE0hZis/rvVNS9XR+fHE=
+          cidr: 192.168.130.0/24
+          firewall:
+            firewalld:
+              allowed: true
+      servers:
+        k3s:
+          config:
+            cluster-cidr: 10.130.0.0/16
+            cluster-dns: 10.131.0.10
+            cluster-domain: k3s.dev.eu1.infraunlimited.tech
+            disable:
+              - metrics-server
+              - traefik
+              - servicelb
+            disable-cloud-controller: true
+            kube-apiserver-arg:
+              - default-not-ready-toleration-seconds=60
+              - default-unreachable-toleration-seconds=60
+            kube-controller-manager-arg:
+              - node-monitor-grace-period=2m
+            kubelet-arg:
+              - node-status-update-frequency=20s
+              - system-reserved=cpu=1,memory=1Gi
+            node-taint:
+              - CriticalAddonsOnly=true:NoExecute
+              - node-role.kubernetes.io/control-plane:NoSchedule
+            service-cidr: 10.131.0.0/16
+    id_stack: spigell/identity/prod
+    infra_stack: spigell/managed-infrastructure/hetzner-eu1-dev
+    nodes:
+      agents:
+        - id: hz-dev-eu1-server02
+      servers:
+        - id: hz-dev-eu1-server01
+          k3s:
+            config:
+              node-label:
+                - infraunlimited.tech/kilo-vpn-node=true
+          leader: true
