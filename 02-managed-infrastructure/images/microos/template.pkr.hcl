@@ -1,3 +1,15 @@
+packer {
+  required_plugins {
+    hcloud = {
+      version = ">= 1.0.0"
+      source  = "github.com/hashicorp/hcloud"
+    }
+  }
+}
+
+locals {
+  builddate = formatdate("YYYY-MM-DD", timestamp())
+}
 
 source "hcloud" "main" {
   image       = "ubuntu-20.04"
@@ -8,7 +20,7 @@ source "hcloud" "main" {
     name    = "microos"
     version = "production"
   }
-  snapshot_name = "microos-amd64-2023-04-24"
+  snapshot_name = "microos-amd64-{{ isotime `2006-01-02` }}"
   ssh_username  = "root"
 }
 

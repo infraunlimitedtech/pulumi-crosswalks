@@ -19,9 +19,9 @@ import (
 )
 
 const (
-	// Base snapshot for microOs.
 	provider          = "hetzner"
-	defaultImage      = "108334614"
+	// Base snapshot for microOs.
+	defaultImage      = "127538592"
 	defaultServerType = "cpx11"
 	defaultLocation   = "hel1"
 )
