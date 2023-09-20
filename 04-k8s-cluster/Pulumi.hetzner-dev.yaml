@@ -23,11 +23,12 @@ config:
         secure: AAABANecFG5q5Hk2Sg3tlvzIsnyuZLqbhwpPYpd4ipgpB72awOrWYYr/WJ3lUCTT1wyTBKGToGYcseRIFtp+BU3UEFHjto5o41jdUA==
       version: 0.5.0
     nginxIngress:
+      replicas: 1
+      clusterIP: 10.41.20.1
       helm:
         version: 0.16.2
       kubeapi:
         clusterIp: 10.41.1.1
-      replica: 1
   k8s-cluster:main:
     infraStack: spigell/managed-infrastructure/hetzner-dev
   k8s-cluster:rbac:

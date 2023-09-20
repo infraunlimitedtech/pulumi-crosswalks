@@ -24,7 +24,7 @@ func (a *Addons) RunNginxIngress() error {
 		Values: pulumi.Map{
 			"controller": pulumi.Map{
 				"name":         pulumi.String(addonName),
-				"replicaCount": pulumi.Int(1),
+				"replicaCount": pulumi.Int(a.NginxIngress.Replicas),
 				"nodeSelector": pulumi.Map{
 					"node-role.kubernetes.io/master": pulumi.String("true"),
 				},
@@ -94,7 +94,6 @@ func (a *Addons) RunNginxIngress() error {
 	if err != nil {
 		return err
 	}
-	a.ctx.Export("clusters:addons:kubeAPIAddress", pulumi.String(kubeAPIAddr))
 
 	_, err = corev1.NewService(a.ctx, "nginxIngressAddonLoadBalancerKubeApi", &corev1.ServiceArgs{
 		ApiVersion: pulumi.String("v1"),
@@ -111,6 +110,38 @@ func (a *Addons) RunNginxIngress() error {
 			ClusterIP: pulumi.String(a.NginxIngress.KubeAPI.ClusterIP),
 			Ports: corev1.ServicePortArray{
 				&corev1.ServicePortArgs{
+					Protocol: pulumi.String("TCP"),
+					Port:     pulumi.Int(443),
+				},
+			},
+		},
+	}, pulumi.DeleteBeforeReplace(true), pulumi.DependsOn([]pulumi.Resource{deploy}))
+
+	if err != nil {
+		return err
+	}
+
+	_, err = corev1.NewService(a.ctx, "nginxIngressAddonLoadBalancerMain", &corev1.ServiceArgs{
+		ApiVersion: pulumi.String("v1"),
+		Kind:       pulumi.String("Service"),
+		Metadata: &metav1.ObjectMetaArgs{
+			Name:      pulumi.String("ingress"),
+			Namespace: deploy.Namespace,
+		},
+		Spec: &corev1.ServiceSpecArgs{
+			Selector: pulumi.StringMap{
+				"app": pulumi.String(a.NginxIngress.Name),
+			},
+			Type:      pulumi.String("ClusterIP"),
+			ClusterIP: pulumi.String(a.NginxIngress.ClusterIP),
+			Ports: corev1.ServicePortArray{
+				&corev1.ServicePortArgs{
+					Name: pulumi.String("http"),
+					Protocol: pulumi.String("TCP"),
+					Port:     pulumi.Int(80),
+				},
+				&corev1.ServicePortArgs{
+					Name: pulumi.String("https"),
 					Protocol: pulumi.String("TCP"),
 					Port:     pulumi.Int(443),
 				},

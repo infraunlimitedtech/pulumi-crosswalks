@@ -11,6 +11,10 @@ import (
 	pulumiConfig "github.com/pulumi/pulumi/sdk/v3/go/pulumi/config"
 )
 
+type Addon interface {
+	IsEnabled() config.Status
+}
+
 type Addons struct {
 	ctx          *pulumi.Context
 	Namespace    *corev1.Namespace
@@ -74,9 +78,10 @@ type MetalLbPool struct {
 
 type NginxIngress struct {
 	Name    string
+	ClusterIP string
 	Domain  string
 	KubeAPI NginxKubeAPI
-	Replica int
+	Replicas int
 	Helm    *config.HelmParams
 }
 
@@ -135,6 +140,8 @@ func Init(ctx *pulumi.Context, s *spec.ClusterSpec) (*Addons, error) {
 			Domain:  s.InternalDomainZone,
 			Helm:    pulumiAddonsCfg.NginxIngress.Helm,
 			KubeAPI: pulumiAddonsCfg.NginxIngress.KubeAPI,
+			ClusterIP: pulumiAddonsCfg.NginxIngress.ClusterIP,
+			Replicas: pulumiAddonsCfg.NginxIngress.Replicas,
 		},
 		Monitoring: pulumiAddonsCfg.Monitoring,
 		MetalLb:    pulumiAddonsCfg.MetalLb,
