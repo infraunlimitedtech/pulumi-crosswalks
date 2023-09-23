@@ -1,9 +1,13 @@
 package addons
 
 import (
-	"k8s-cluster/config"
 	"k8s-cluster/packages/kilo"
 	"k8s-cluster/spec"
+	nginx "k8s-cluster/addons/nginx-ingress"
+	metricServer "k8s-cluster/addons/metric-server"
+	kiloAddon "k8s-cluster/addons/kilo"
+	"k8s-cluster/addons/cloudflared"
+	"k8s-cluster/addons/monitoring"
 
 	corev1 "github.com/pulumi/pulumi-kubernetes/sdk/v3/go/kubernetes/core/v1"
 	metav1 "github.com/pulumi/pulumi-kubernetes/sdk/v3/go/kubernetes/meta/v1"
@@ -12,85 +16,33 @@ import (
 )
 
 type Addon interface {
-	IsEnabled() config.Status
+	IsEnabled() bool
+	Manage(*pulumi.Context, *corev1.Namespace) error
 }
 
 type Addons struct {
-	ctx          *pulumi.Context
-	Namespace    *corev1.Namespace
 	Kilo         *kilo.Kilo
-	MetalLb      *MetalLb
-	NginxIngress *NginxIngress
-	Monitoring   *Monitoring
+	NginxIngress *nginx.NginxIngress
+	Monitoring   *monitoring.Monitoring
+	Cloudflared  *cloudflared.Cloudflared
 }
 
-type Monitoring struct {
-	NodeExporter    *NodeExporter
-	VictoriaMetrics *VictoriaMetrics
-	VMAlert         *VMAlert
+type Runner struct {
+	ctx    *pulumi.Context
+	Namespace *corev1.Namespace
+	addons []Addon
 }
 
-type NodeExporter struct {
-	Helm *config.HelmParams
-}
+const (
+	namespace = "infra-system"
+)
 
-type VictoriaMetrics struct {
-	Helm   *config.HelmParams
-	Server *VictoriaMetricsServer
-}
+func NewRunner(ctx *pulumi.Context, s *spec.ClusterSpec, infraLayerNodeInfo pulumi.AnyOutput) (*Runner, error) {
+	// Init vars from stack's config
+	var pulumiAddonsCfg Addons
+	cfg := pulumiConfig.New(ctx, "")
+	cfg.RequireSecretObject("addons", &pulumiAddonsCfg)
 
-type VMAlert struct {
-	Enabled      *config.Status
-	Alertmanager *VMAlertAlertmanager
-	Helm         *config.HelmParams
-}
-
-type VMAlertAlertmanager struct {
-	Telegram *VMAlertAlertmanagerTelegram
-}
-
-type VMAlertAlertmanagerTelegram struct {
-	Token  string
-	ChatID string
-}
-
-type VictoriaMetricsServer struct {
-	ClusterIP string
-	Port      int
-}
-
-type MetalLb struct {
-	Helm               *config.HelmParams
-	Pools              *MetalLbPools
-	DefaultNetworkPool string
-	ExternalIP         string
-	KubeapiIP          string
-}
-
-type MetalLbPools struct {
-	Default MetalLbPool
-	Kubeapi MetalLbPool
-}
-
-type MetalLbPool struct {
-	Network string
-}
-
-type NginxIngress struct {
-	Name    string
-	ClusterIP string
-	Domain  string
-	KubeAPI NginxKubeAPI
-	Replicas int
-	Helm    *config.HelmParams
-}
-
-type NginxKubeAPI struct {
-	ClusterIP string
-}
-
-func Init(ctx *pulumi.Context, s *spec.ClusterSpec) (*Addons, error) {
-	namespace := "infra-system"
 
 	ns, err := corev1.NewNamespace(ctx, namespace, &corev1.NamespaceArgs{
 		Metadata: &metav1.ObjectMetaArgs{
@@ -101,10 +53,6 @@ func Init(ctx *pulumi.Context, s *spec.ClusterSpec) (*Addons, error) {
 		return nil, err
 	}
 
-	// Init vars from stack's config
-	var pulumiAddonsCfg Addons
-	cfg := pulumiConfig.New(ctx, "")
-	cfg.RequireSecretObject("addons", &pulumiAddonsCfg)
 
 	_, err = corev1.NewLimitRange(ctx, namespace, &corev1.LimitRangeArgs{
 		ApiVersion: pulumi.String("v1"),
@@ -133,9 +81,7 @@ func Init(ctx *pulumi.Context, s *spec.ClusterSpec) (*Addons, error) {
 	}
 
 	a := &Addons{
-		Namespace: ns,
-		ctx:       ctx,
-		NginxIngress: &NginxIngress{
+		NginxIngress: &nginx.NginxIngress{
 			Name:    "nginx-ingress-addon",
 			Domain:  s.InternalDomainZone,
 			Helm:    pulumiAddonsCfg.NginxIngress.Helm,
@@ -144,8 +90,31 @@ func Init(ctx *pulumi.Context, s *spec.ClusterSpec) (*Addons, error) {
 			Replicas: pulumiAddonsCfg.NginxIngress.Replicas,
 		},
 		Monitoring: pulumiAddonsCfg.Monitoring,
-		MetalLb:    pulumiAddonsCfg.MetalLb,
 		Kilo:       pulumiAddonsCfg.Kilo,
+		Cloudflared: pulumiAddonsCfg.Cloudflared,
 	}
-	return a, nil
+
+	return &Runner{
+		ctx:    ctx,
+		Namespace: ns,
+		addons: []Addon{
+			nginx.New(a.NginxIngress),
+			metricServer.New(),
+			kiloAddon.New(a.Kilo, infraLayerNodeInfo),
+			cloudflared.New(a.Cloudflared, a.NginxIngress.ClusterIP),
+			monitoring.New(a.Monitoring),
+		},
+	}, nil
+}
+
+func (r *Runner) Run() error {
+	for _, addon := range r.addons {
+		if addon.IsEnabled() {
+			if err := addon.Manage(r.ctx, r.Namespace); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }

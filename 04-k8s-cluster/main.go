@@ -2,8 +2,6 @@ package main
 
 import (
 	"k8s-cluster/addons"
-	"k8s-cluster/addons/monitoring"
-	"k8s-cluster/infra/firewall"
 	"k8s-cluster/rbac"
 	"k8s-cluster/rbac/sa"
 	"k8s-cluster/services"
@@ -33,16 +31,13 @@ func main() {
 			return err
 		}
 
-		kubeClusterAddons, err := addons.Init(ctx, kubeClusterSpec)
+		kubeClusterAddons, err := addons.NewRunner(ctx, kubeClusterSpec, infraLayerNodeInfo)
 		if err != nil {
 			return err
 		}
 
-		if kubeClusterAddons.Cloudflared.IsEnabled() {
-			err = kubeClusterAddons.RunCloudflared()
-			if err != nil {
-				return err
-			}
+		if err := kubeClusterAddons.Run(); err != nil {
+			return err
 		}
 
 		kubeClusterServices, err := services.NewRunner(ctx)
@@ -54,34 +49,10 @@ func main() {
 			return err
 		}
 
-		if err := kubeClusterAddons.RunMetricServer(); err != nil {
-			return err
-		}
-
-		if err := kubeClusterAddons.RunNginxIngress(); err != nil {
-			return err
-		}
-
-		kilo, err := kubeClusterAddons.RunKilo()
-		if err != nil {
-			return err
-		}
-
-		err = monitoring.Run(ctx, kubeClusterAddons.Monitoring)
-		if err != nil {
-			return err
-		}
-
 		if kubeRBAC.ServiceAccounts.Prometheus {
 			sa.PrometheusAccount(kubeClusterAddons.Namespace, ctx)
 		}
 
-		if kilo.Firewalls != nil {
-			err = firewall.Manage(ctx, infraLayerNodeInfo, kilo.GetRequiredFirewallRules())
-			if err != nil {
-				return err
-			}
-		}
 
 		return nil
 	})

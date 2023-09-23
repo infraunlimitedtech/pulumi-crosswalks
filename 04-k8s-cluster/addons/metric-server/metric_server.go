@@ -1,15 +1,31 @@
-package addons
+package metrics_server
 
 import (
 	helmv3 "github.com/pulumi/pulumi-kubernetes/sdk/v3/go/kubernetes/helm/v3"
+		corev1 "github.com/pulumi/pulumi-kubernetes/sdk/v3/go/kubernetes/core/v1"
+
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
 
-func (a *Addons) RunMetricServer() error {
-	_, err := helmv3.NewRelease(a.ctx, "metrics-server", &helmv3.ReleaseArgs{
+type MetricServer struct {
+	Enabled bool
+}
+
+func New() *MetricServer {
+	return &MetricServer{
+		Enabled: true,
+	}
+}
+
+func (m *MetricServer) IsEnabled() bool {
+	return m.Enabled
+}
+
+func (m *MetricServer) Manage(ctx *pulumi.Context, ns *corev1.Namespace) error {
+	_, err := helmv3.NewRelease(ctx, "metrics-server", &helmv3.ReleaseArgs{
 		Chart:     pulumi.String("metrics-server"),
 		Version:   pulumi.String("v6.2.17"),
-		Namespace: a.Namespace.Metadata.Name().Elem(),
+		Namespace: ns.Metadata.Name().Elem(),
 		RepositoryOpts: &helmv3.RepositoryOptsArgs{
 			Repo: pulumi.String("https://charts.bitnami.com/bitnami"),
 		},

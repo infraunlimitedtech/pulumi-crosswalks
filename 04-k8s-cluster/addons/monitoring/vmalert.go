@@ -5,9 +5,9 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -51,7 +51,7 @@ func (m *Stack) runVMAlert() error {
 	}
 
 	// TO DO: move the file to monitoring repo
-	alertmanagerTelegramTemplate, err := ioutil.ReadFile("addons/monitoring/alertmanager-telegram.tmpl")
+	alertmanagerTelegramTemplate, err := os.ReadFile("addons/monitoring/alertmanager-telegram.tmpl")
 	if err != nil {
 		return fmt.Errorf("alertmanager template: %w", err)
 	}

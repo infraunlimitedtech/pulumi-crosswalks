@@ -1,6 +1,7 @@
-package addons
+package nginx_ingress
 
 import (
+	"k8s-cluster/config"
 	nginxv1 "k8s-cluster/crds/generated/nginxinc/kubernetes-ingress/k8s/v1alpha1"
 
 	corev1 "github.com/pulumi/pulumi-kubernetes/sdk/v3/go/kubernetes/core/v1"
@@ -9,22 +10,48 @@ import (
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
 
-func (a *Addons) RunNginxIngress() error {
-	addonName := a.NginxIngress.Name
-	ingressClassName := a.NginxIngress.Name
+type NginxIngress struct {
+	Enabled bool
+	Name    string
+	ClusterIP string
+	Domain  string
+	KubeAPI NginxKubeAPI
+	Replicas int
+	Helm    *config.HelmParams
+}
 
-	deploy, err := helmv3.NewRelease(a.ctx, addonName, &helmv3.ReleaseArgs{
+type NginxKubeAPI struct {
+	ClusterIP string
+}
+
+func New(cfg *NginxIngress) *NginxIngress {
+	if cfg == nil {
+		cfg = &NginxIngress{}
+	}
+	cfg.Enabled = true
+	return cfg
+}
+
+func (n *NginxIngress) IsEnabled() bool {
+	return n.Enabled
+}
+
+func (n *NginxIngress) Manage(ctx *pulumi.Context, ns *corev1.Namespace) error {
+	addonName := n.Name
+	ingressClassName := n.Name
+
+	deploy, err := helmv3.NewRelease(ctx, addonName, &helmv3.ReleaseArgs{
 		Name:      pulumi.String(addonName),
 		Chart:     pulumi.String("nginx-ingress"),
-		Namespace: a.Namespace.Metadata.Name().Elem(),
-		Version:   pulumi.String(a.NginxIngress.Helm.Version),
+		Namespace: ns.Metadata.Name().Elem(),
+		Version:   pulumi.String(n.Helm.Version),
 		RepositoryOpts: &helmv3.RepositoryOptsArgs{
 			Repo: pulumi.String("https://helm.nginx.com/stable"),
 		},
 		Values: pulumi.Map{
 			"controller": pulumi.Map{
 				"name":         pulumi.String(addonName),
-				"replicaCount": pulumi.Int(a.NginxIngress.Replicas),
+				"replicaCount": pulumi.Int(n.Replicas),
 				"nodeSelector": pulumi.Map{
 					"node-role.kubernetes.io/master": pulumi.String("true"),
 				},
@@ -64,9 +91,9 @@ func (a *Addons) RunNginxIngress() error {
 	}
 
 	kubeUpstreamName := "kube-masters"
-	kubeAPIAddr := "kubernetes." + a.NginxIngress.Domain
+	kubeAPIAddr := "kubernetes." + n.Domain
 
-	_, err = nginxv1.NewTransportServer(a.ctx, "nginxIngressAddonTransportServerKubernetes", &nginxv1.TransportServerArgs{
+	_, err = nginxv1.NewTransportServer(ctx, "nginxIngressAddonTransportServerKubernetes", &nginxv1.TransportServerArgs{
 		Metadata: &metav1.ObjectMetaArgs{
 			Name:      pulumi.String("kube-masters"),
 			Namespace: pulumi.String("default"),
@@ -95,7 +122,7 @@ func (a *Addons) RunNginxIngress() error {
 		return err
 	}
 
-	_, err = corev1.NewService(a.ctx, "nginxIngressAddonLoadBalancerKubeApi", &corev1.ServiceArgs{
+	_, err = corev1.NewService(ctx, "nginxIngressAddonLoadBalancerKubeApi", &corev1.ServiceArgs{
 		ApiVersion: pulumi.String("v1"),
 		Kind:       pulumi.String("Service"),
 		Metadata: &metav1.ObjectMetaArgs{
@@ -104,10 +131,10 @@ func (a *Addons) RunNginxIngress() error {
 		},
 		Spec: &corev1.ServiceSpecArgs{
 			Selector: pulumi.StringMap{
-				"app": pulumi.String(a.NginxIngress.Name),
+				"app": pulumi.String(n.Name),
 			},
 			Type:      pulumi.String("ClusterIP"),
-			ClusterIP: pulumi.String(a.NginxIngress.KubeAPI.ClusterIP),
+			ClusterIP: pulumi.String(n.KubeAPI.ClusterIP),
 			Ports: corev1.ServicePortArray{
 				&corev1.ServicePortArgs{
 					Protocol: pulumi.String("TCP"),
@@ -121,7 +148,7 @@ func (a *Addons) RunNginxIngress() error {
 		return err
 	}
 
-	_, err = corev1.NewService(a.ctx, "nginxIngressAddonLoadBalancerMain", &corev1.ServiceArgs{
+	_, err = corev1.NewService(ctx, "nginxIngressAddonLoadBalancerMain", &corev1.ServiceArgs{
 		ApiVersion: pulumi.String("v1"),
 		Kind:       pulumi.String("Service"),
 		Metadata: &metav1.ObjectMetaArgs{
@@ -130,10 +157,10 @@ func (a *Addons) RunNginxIngress() error {
 		},
 		Spec: &corev1.ServiceSpecArgs{
 			Selector: pulumi.StringMap{
-				"app": pulumi.String(a.NginxIngress.Name),
+				"app": pulumi.String(n.Name),
 			},
 			Type:      pulumi.String("ClusterIP"),
-			ClusterIP: pulumi.String(a.NginxIngress.ClusterIP),
+			ClusterIP: pulumi.String(n.ClusterIP),
 			Ports: corev1.ServicePortArray{
 				&corev1.ServicePortArgs{
 					Name: pulumi.String("http"),
