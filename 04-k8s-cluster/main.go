@@ -38,16 +38,20 @@ func main() {
 			return err
 		}
 
-		kubeClusterServices, err := services.Init(ctx)
+		if kubeClusterAddons.Cloudflared.IsEnabled() {
+			err = kubeClusterAddons.RunCloudflared()
+			if err != nil {
+				return err
+			}
+		}
+
+		kubeClusterServices, err := services.NewRunner(ctx)
 		if err != nil {
 			return err
 		}
 
-		if kubeClusterServices.KiloVPN.IsEnabled() {
-			_, err = kubeClusterServices.RunKiloVPN()
-			if err != nil {
-				return err
-			}
+		if err := kubeClusterServices.Run(); err != nil {
+			return err
 		}
 
 		if err := kubeClusterAddons.RunMetricServer(); err != nil {
