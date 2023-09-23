@@ -1,6 +1,19 @@
 encryptionsalt: v1:OjGHy649+uc=:v1:6ZYQ77u3o/0C5nVc:sCQkdcvDwSDyNqTk81ZTaH9ElcmCOA==
 config:
   k8s-cluster:addons:
+    cloudflared:
+      account:
+        secure: v1:iN1ZHzEzDCxOJchQ:s9UCSP4vOrMugNLB3g6qkzw2SrkX4Csdr9DUc/WIN1+0VlzsrkfZq75k2EcNrq3X
+      enabled: true
+      helm:
+        version: 0.3.0
+      ingress:
+        - hostname: gitlab-new.infraunlimited.tech
+        - hostname: registry-gitlab-new.infraunlimited.tech
+      secret:
+        secure: v1:JMymSOf8F8iNm/tJ:aWCdG2WoTmOL8+zzpBVy+TmHRvP8blcjMswUS9SXLS5AeYNmuvRZhaI/jhpnkZUZGJZDRC9RJiCz8gcI
+      tunnelID: bc8f11e1-2154-45dd-b9e7-9be43743a47a
+      tunnelName: eu1-prod
     kilo:
       crds:
         install: true
@@ -36,12 +49,12 @@ config:
         helm:
           version: 0.5.23
     nginxIngress:
-      replicas: 1
       clusterIp: 10.121.20.1
       helm:
         version: 0.16.2
       kubeapi:
         clusterIp: 10.121.1.1
+      replicas: 1
   k8s-cluster:main:
     infraStack: spigell/managed-infrastructure/external-eu1-prod
   k8s-cluster:rbac:
