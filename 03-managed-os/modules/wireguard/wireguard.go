@@ -6,8 +6,9 @@ import (
 	"managed-os/utils"
 	"net"
 
+	"github.com/pulumi/pulumi-command/sdk/go/command/remote"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
-	"github.com/spigell/pulumi-file/sdk/go/file"
+	remotefile "github.com/spigell/pulumi-file/sdk/go/file/remote"
 	"golang.zx2c4.com/wireguard/wgctrl/wgtypes"
 	"inet.af/netaddr"
 )
@@ -52,19 +53,16 @@ func (c *Cluster) Manage(deps []map[string]pulumi.Resource) (*CreatedCluster, er
 		if node.Wireguard.MgmtNode {
 			done.MasterConfig = generateWgConfig(wgPeers, node)
 		} else {
-			deployed, err := file.NewRemote(c.Ctx, fmt.Sprintf("%s-WGCluster", node.ID), &file.RemoteArgs{
-				Connection: &file.ConnectionArgs{
-					Address:    pulumi.Sprintf("%s:22", utils.ExtractValueFromPulumiMapMap(c.InfraLayerNodeInfo, node.ID, "ip")),
+			deployed, err := remotefile.NewFile(c.Ctx, fmt.Sprintf("%s-WGCluster", node.ID), &remotefile.FileArgs{
+				Connection: &remotefile.ConnectionArgs{
+					Host:       utils.ExtractValueFromPulumiMapMap(c.InfraLayerNodeInfo, node.ID, "ip"),
 					User:       utils.ExtractValueFromPulumiMapMap(c.InfraLayerNodeInfo, node.ID, "user"),
 					PrivateKey: utils.ExtractValueFromPulumiMapMap(c.InfraLayerNodeInfo, node.ID, "key"),
 				},
-				Hooks: &file.HooksArgs{
-					CommandAfterCreate: pulumi.String("sudo systemctl enable wg-quick@kubewg0 && sudo systemctl restart wg-quick@kubewg0"),
-					CommandAfterUpdate: pulumi.String("sudo systemctl restart wg-quick@kubewg0"),
-				},
-				UseSudo: pulumi.Bool(true),
-				Path:    pulumi.String("/etc/wireguard/kubewg0.conf"),
-				Content: generateWgConfig(wgPeers, node),
+				UseSudo:  pulumi.Bool(true),
+				Path:     pulumi.String("/etc/wireguard/kubewg0.conf"),
+				Content:  generateWgConfig(wgPeers, node),
+				SftpPath: pulumi.String("/usr/libexec/ssh/sftp-server"),
 			}, pulumi.DependsOn(utils.ConvertMapSliceToSliceByKey(deps, node.ID)),
 				pulumi.RetainOnDelete(true),
 				pulumi.Timeouts(&pulumi.CustomTimeouts{Create: "5m"}),
@@ -73,7 +71,28 @@ func (c *Cluster) Manage(deps []map[string]pulumi.Resource) (*CreatedCluster, er
 				return nil, err
 			}
 
-			resources[node.ID] = deployed
+			restarted, err := remote.NewCommand(c.Ctx, fmt.Sprintf("%s-RestartWG", node.ID), &remote.CommandArgs{
+				Connection: &remote.ConnectionArgs{
+					Host:       utils.ExtractValueFromPulumiMapMap(c.InfraLayerNodeInfo, node.ID, "ip"),
+					User:       utils.ExtractValueFromPulumiMapMap(c.InfraLayerNodeInfo, node.ID, "user"),
+					PrivateKey: utils.ExtractValueFromPulumiMapMap(c.InfraLayerNodeInfo, node.ID, "key"),
+				},
+				Create: pulumi.String("sudo systemctl enable --now wg-quick@kubewg0"),
+				Delete: pulumi.String("sudo systemctl disable --now wg-quick@kubewg0"),
+				Triggers: pulumi.Array{
+					deployed.Md5sum,
+					deployed.Permissions,
+					deployed.Connection,
+					deployed.Path,
+				},
+			}, pulumi.DependsOn([]pulumi.Resource{deployed}),
+				pulumi.DeleteBeforeReplace(true),
+			)
+			if err != nil {
+				return nil, err
+			}
+
+			resources[node.ID] = restarted
 		}
 	}
 

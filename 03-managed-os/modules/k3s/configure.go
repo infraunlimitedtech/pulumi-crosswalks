@@ -6,8 +6,9 @@ import (
 	"managed-os/modules/wireguard"
 	"managed-os/utils"
 
+	"github.com/pulumi/pulumi-command/sdk/go/command/remote"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
-	"github.com/spigell/pulumi-file/sdk/go/file"
+	remotefile "github.com/spigell/pulumi-file/sdk/go/file/remote"
 	"gopkg.in/yaml.v3"
 )
 
@@ -16,46 +17,58 @@ var svcName = "k3s"
 func (c *Cluster) configure(wgPeers pulumi.AnyOutput, deps []map[string]pulumi.Resource) (map[string]pulumi.Resource, error) {
 	result := make(map[string]pulumi.Resource)
 
-	leaderDeployed, err := file.NewRemote(c.Ctx, fmt.Sprintf("%s-K3sCluster", c.Leader.ID), &file.RemoteArgs{
-		Connection: &file.ConnectionArgs{
-			Address:    pulumi.Sprintf("%s:22", utils.ExtractValueFromPulumiMapMap(c.InfraLayerNodeInfo, c.Leader.ID, "ip")),
+	leaderDeployed, err := remotefile.NewFile(c.Ctx, fmt.Sprintf("%s-K3sCluster", c.Leader.ID), &remotefile.FileArgs{
+		Connection: &remotefile.ConnectionArgs{
+			Host:       utils.ExtractValueFromPulumiMapMap(c.InfraLayerNodeInfo, c.Leader.ID, "ip"),
 			User:       utils.ExtractValueFromPulumiMapMap(c.InfraLayerNodeInfo, c.Leader.ID, "user"),
 			PrivateKey: utils.ExtractValueFromPulumiMapMap(c.InfraLayerNodeInfo, c.Leader.ID, "key"),
 		},
-		Hooks: &file.HooksArgs{
-			CommandAfterCreate:  pulumi.Sprintf("sudo systemctl enable --now %s", svcName),
-			CommandAfterUpdate:  pulumi.Sprintf("sudo systemctl restart %s", svcName),
-			CommandAfterDestroy: pulumi.Sprintf("sudo systemctl disable --now %s", svcName),
-		},
-		UseSudo: pulumi.Bool(true),
-		Path:    pulumi.String(cfgPath),
-		Content: c.renderK3sCfg(c.Leader, wgPeers),
+		UseSudo:  pulumi.Bool(true),
+		Path:     pulumi.String(cfgPath),
+		Content:  c.renderK3sCfg(c.Leader, wgPeers),
+		SftpPath: pulumi.String("/usr/libexec/ssh/sftp-server"),
 	}, pulumi.DependsOn(utils.ConvertMapSliceToSliceByKey(deps, c.Leader.ID)), pulumi.RetainOnDelete(true))
 	if err != nil {
 		return nil, err
 	}
 
-	result[c.Leader.ID] = leaderDeployed
+	leaderRestared, err := remote.NewCommand(c.Ctx, fmt.Sprintf("%s-RestartK3s", c.Leader.ID), &remote.CommandArgs{
+		Connection: &remote.ConnectionArgs{
+			Host:       utils.ExtractValueFromPulumiMapMap(c.InfraLayerNodeInfo, c.Leader.ID, "ip"),
+			User:       utils.ExtractValueFromPulumiMapMap(c.InfraLayerNodeInfo, c.Leader.ID, "user"),
+			PrivateKey: utils.ExtractValueFromPulumiMapMap(c.InfraLayerNodeInfo, c.Leader.ID, "key"),
+		},
+		Create: pulumi.Sprintf("sudo systemctl enable --now %s", svcName),
+		Delete: pulumi.Sprintf("sudo systemctl disable --now %s", svcName),
+		Triggers: pulumi.Array{
+			leaderDeployed.Md5sum,
+			leaderDeployed.Permissions,
+			leaderDeployed.Connection,
+		},
+	}, pulumi.DependsOn([]pulumi.Resource{leaderDeployed}),
+		pulumi.DeleteBeforeReplace(true),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	result[c.Leader.ID] = leaderRestared
 
 	for _, node := range c.Followers {
 		if node.Role == "agent" {
 			svcName = "k3s-agent"
 		}
 
-		nodeDeployed, err := file.NewRemote(c.Ctx, fmt.Sprintf("%s-ConfigureK3s", node.ID), &file.RemoteArgs{
-			Connection: &file.ConnectionArgs{
-				Address:    pulumi.Sprintf("%s:22", utils.ExtractValueFromPulumiMapMap(c.InfraLayerNodeInfo, node.ID, "ip")),
+		nodeDeployed, err := remotefile.NewFile(c.Ctx, fmt.Sprintf("%s-ConfigureK3s", node.ID), &remotefile.FileArgs{
+			Connection: &remotefile.ConnectionArgs{
+				Host:       utils.ExtractValueFromPulumiMapMap(c.InfraLayerNodeInfo, node.ID, "ip"),
 				User:       utils.ExtractValueFromPulumiMapMap(c.InfraLayerNodeInfo, node.ID, "user"),
 				PrivateKey: utils.ExtractValueFromPulumiMapMap(c.InfraLayerNodeInfo, node.ID, "key"),
 			},
-			Hooks: &file.HooksArgs{
-				CommandAfterCreate:  pulumi.Sprintf("sudo systemctl enable --now %s", svcName),
-				CommandAfterUpdate:  pulumi.Sprintf("sudo systemctl restart %s", svcName),
-				CommandAfterDestroy: pulumi.Sprintf("sudo systemctl disable --now %s", svcName),
-			},
-			UseSudo: pulumi.Bool(true),
-			Path:    pulumi.String(cfgPath),
-			Content: c.renderK3sCfg(node, wgPeers),
+			UseSudo:  pulumi.Bool(true),
+			Path:     pulumi.String(cfgPath),
+			Content:  c.renderK3sCfg(node, wgPeers),
+			SftpPath: pulumi.String("/usr/libexec/ssh/sftp-server"),
 		}, pulumi.DependsOn(append(utils.ConvertMapSliceToSliceByKey(deps, node.ID), leaderDeployed)),
 			pulumi.RetainOnDelete(true))
 		if err != nil {
@@ -63,7 +76,28 @@ func (c *Cluster) configure(wgPeers pulumi.AnyOutput, deps []map[string]pulumi.R
 			return nil, err
 		}
 
-		result[node.ID] = nodeDeployed
+		nodeRestarted, err := remote.NewCommand(c.Ctx, fmt.Sprintf("%s-RestartK3s", node.ID), &remote.CommandArgs{
+			Connection: &remote.ConnectionArgs{
+				Host:       utils.ExtractValueFromPulumiMapMap(c.InfraLayerNodeInfo, node.ID, "ip"),
+				User:       utils.ExtractValueFromPulumiMapMap(c.InfraLayerNodeInfo, node.ID, "user"),
+				PrivateKey: utils.ExtractValueFromPulumiMapMap(c.InfraLayerNodeInfo, node.ID, "key"),
+			},
+			Create: pulumi.Sprintf("sudo systemctl enable --now %s", svcName),
+			Delete: pulumi.Sprintf("sudo systemctl disable --now %s", svcName),
+			Triggers: pulumi.Array{
+				nodeDeployed.Md5sum,
+				nodeDeployed.Permissions,
+				nodeDeployed.Connection,
+				nodeDeployed.Path,
+			},
+		}, pulumi.DependsOn([]pulumi.Resource{nodeDeployed}),
+			pulumi.DeleteBeforeReplace(true),
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		result[node.ID] = nodeRestarted
 	}
 	return result, nil
 }

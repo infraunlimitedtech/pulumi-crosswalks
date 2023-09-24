@@ -1,13 +1,15 @@
 module managed-os
 
-go 1.20
+go 1.21
+
+toolchain go1.21.0
 
 require (
 	github.com/BurntSushi/toml v1.3.2
 	github.com/imdario/mergo v0.3.16
 	github.com/pulumi/pulumi-command/sdk v0.8.2
 	github.com/pulumi/pulumi/sdk/v3 v3.81.0
-	github.com/spigell/pulumi-file/sdk v0.0.0-20220328220825-472428d2995c
+	github.com/spigell/pulumi-file/sdk v0.0.0-20230924134814-22c8c9c3511e
 	github.com/stretchr/testify v1.8.2
 	golang.zx2c4.com/wireguard/wgctrl v0.0.0-20230429144221-925a1e7659e6
 	gopkg.in/yaml.v3 v3.0.1

@@ -320,6 +320,8 @@ github.com/spf13/pflag v1.0.5/go.mod h1:McXfInJRrz4CZXVZOBLb0bTZqETkiAhM9Iw0y3An
 github.com/spf13/viper v1.4.0/go.mod h1:PTJ7Z/lr49W6bUbkmS1V3by4uWynFiR9p7+dSq/yZzE=
 github.com/spigell/pulumi-file/sdk v0.0.0-20220328220825-472428d2995c h1:3q7WMM7j6hDgcjnryWsgivsfnI8D3Y6u3MAdPUHrqKY=
 github.com/spigell/pulumi-file/sdk v0.0.0-20220328220825-472428d2995c/go.mod h1:xzm0pYi4M7EDzy5YsQ3B7bZkvnOtUGTTriN2Z3+FnR0=
+github.com/spigell/pulumi-file/sdk v0.0.0-20230924134814-22c8c9c3511e h1:PlRUG/P2VVuY9o9AKg3JI0fw+w91D7ZPV+NioIT2UY8=
+github.com/spigell/pulumi-file/sdk v0.0.0-20230924134814-22c8c9c3511e/go.mod h1:cRSmfR7rvOjmBYmu7xXh7QMfPb+Y7az9q0awK6haFS8=
 github.com/src-d/gcfg v1.4.0/go.mod h1:p/UMsR43ujA89BJY9duynAwIpvqEujIH/jFlfL7jWoI=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.1.1/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=

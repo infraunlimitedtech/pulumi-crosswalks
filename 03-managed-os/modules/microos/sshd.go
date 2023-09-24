@@ -7,7 +7,7 @@ import (
 
 	"github.com/pulumi/pulumi-command/sdk/go/command/remote"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
-	"github.com/spigell/pulumi-file/sdk/go/file"
+	remotefile "github.com/spigell/pulumi-file/sdk/go/file/remote"
 )
 
 func (o *Cluster) ConfigureSSHD(name string, cfg map[string]string) (map[string]pulumi.Resource, error) {
@@ -31,24 +31,42 @@ func (o *Cluster) ConfigureSSHD(name string, cfg map[string]string) (map[string]
 			return nil, err
 		}
 
-		deployed, err := file.NewRemote(o.Ctx, fmt.Sprintf("%s-ConfigureSSHD-%s", node.ID, name), &file.RemoteArgs{
-			Connection: &file.ConnectionArgs{
-				Address:    pulumi.Sprintf("%s:22", utils.ExtractValueFromPulumiMapMap(o.InfraLayerNodeInfo, node.ID, "ip")),
+		deployed, err := remotefile.NewFile(o.Ctx, fmt.Sprintf("%s-ConfigureSSHD-%s", node.ID, name), &remotefile.FileArgs{
+			Connection: &remotefile.ConnectionArgs{
+				Host:       utils.ExtractValueFromPulumiMapMap(o.InfraLayerNodeInfo, node.ID, "ip"),
 				User:       utils.ExtractValueFromPulumiMapMap(o.InfraLayerNodeInfo, node.ID, "user"),
 				PrivateKey: utils.ExtractValueFromPulumiMapMap(o.InfraLayerNodeInfo, node.ID, "key"),
 			},
-			Hooks: &file.HooksArgs{
-				CommandAfterCreate: pulumi.String("sudo systemctl reload sshd"),
-				CommandAfterUpdate: pulumi.String("sudo systemctl reload sshd"),
-			},
-			UseSudo: pulumi.Bool(true),
-			Path:    pulumi.Sprintf("/etc/ssh/sshd_config.d/%s.conf", name),
-			Content: pulumi.String(b.String()),
+			UseSudo:  pulumi.Bool(true),
+			Path:     pulumi.Sprintf("/etc/ssh/sshd_config.d/%s.conf", name),
+			Content:  pulumi.String(b.String()),
+			SftpPath: pulumi.String("/usr/libexec/ssh/sftp-server"),
 		}, pulumi.RetainOnDelete(true), pulumi.DependsOn([]pulumi.Resource{cleaned}))
 		if err != nil {
 			return nil, err
 		}
-		m[node.ID] = deployed
+
+		restarted, err := remote.NewCommand(o.Ctx, fmt.Sprintf("%s-RestartSSHD", node.ID), &remote.CommandArgs{
+			Connection: &remote.ConnectionArgs{
+				Host:       utils.ExtractValueFromPulumiMapMap(o.InfraLayerNodeInfo, node.ID, "ip"),
+				User:       utils.ExtractValueFromPulumiMapMap(o.InfraLayerNodeInfo, node.ID, "user"),
+				PrivateKey: utils.ExtractValueFromPulumiMapMap(o.InfraLayerNodeInfo, node.ID, "key"),
+			},
+			Create: pulumi.String("sudo systemctl restart sshd"),
+			Triggers: pulumi.Array{
+				deployed.Md5sum,
+				deployed.Permissions,
+				deployed.Connection,
+				deployed.Path,
+			},
+		}, pulumi.DependsOn([]pulumi.Resource{deployed}),
+			pulumi.DeleteBeforeReplace(true),
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		m[node.ID] = restarted
 	}
 
 	return m, nil
