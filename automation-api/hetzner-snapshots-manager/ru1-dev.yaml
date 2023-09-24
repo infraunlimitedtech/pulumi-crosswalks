@@ -1,5 +1,0 @@
----
-stack:
-  path: ../../02-managed-infrastructure
-  name: hetzner-ru1-dev
-

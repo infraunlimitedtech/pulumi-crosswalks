@@ -1,4 +1,0 @@
----
-stack:
-  path: ../../02-managed-infrastructure
-  name: hetzner-dev

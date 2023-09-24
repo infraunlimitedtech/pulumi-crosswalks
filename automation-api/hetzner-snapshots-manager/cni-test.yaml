@@ -1,3 +1,0 @@
-stack:
-  name: hetzner-cni-test
-  path: ../../02-managed-infrastructure
