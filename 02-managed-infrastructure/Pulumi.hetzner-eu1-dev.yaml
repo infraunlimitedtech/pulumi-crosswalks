@@ -25,6 +25,7 @@ config:
           machines:
             - id: hz-dev-eu1-server01
             - id: hz-dev-eu1-server02
+            - id: hz-dev-eu1-server03
   managed-infrastructure:main:
     identitystack: spigell/identity/local
     providers:
