@@ -1,6 +1,6 @@
 config:
-  hcloud:token:
-    secure: AAABAPfcn/avHHkRSQ15G5yizDpSLTD1TER7JkPOCIkeHLDIBBRpHfIEW2b2YGqDTFHuwNBFblUF7Ic1+zbPKOvuX5xmP+KbszoYJiUJ1ffcC1/3O01iHKVTbgcDAzaC
+#  hcloud:token:
+#    secure: AAABAPfcn/avHHkRSQ15G5yizDpSLTD1TER7JkPOCIkeHLDIBBRpHfIEW2b2YGqDTFHuwNBFblUF7Ic1+zbPKOvuX5xmP+KbszoYJiUJ1ffcC1/3O01iHKVTbgcDAzaC
   managed-infrastructure:compute:
     hetzner:
       configuration:
@@ -23,9 +23,9 @@ config:
             image: automation-api
             server_type: cx21
           machines:
-            - id: hz-dev-eu1-server01
-            - id: hz-dev-eu1-server02
-            - id: hz-dev-eu1-server03
+#            - id: hz-dev-eu1-server01
+#            - id: hz-dev-eu1-server02
+#            - id: hz-dev-eu1-server03
   managed-infrastructure:main:
     identitystack: spigell/identity/local
     providers:

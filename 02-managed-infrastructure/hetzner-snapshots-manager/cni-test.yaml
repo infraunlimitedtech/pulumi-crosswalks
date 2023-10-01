@@ -1,0 +1,4 @@
+---
+stack:
+  name: hetzner-cni-test
+  path: ..
