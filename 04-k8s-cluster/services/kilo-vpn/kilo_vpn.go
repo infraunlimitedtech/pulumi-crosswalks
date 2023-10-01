@@ -18,11 +18,10 @@ type KiloVPN struct {
 
 func New(cfg *kilo.Kilo) *KiloVPN {
 	if cfg == nil {
-		cfg = &kilo.Kilo{
-			Enabled: false,
-		}
+		cfg = &kilo.Kilo{}
 	}
 	
+	cfg.Enabled = true
 	cfg.Name = serviceName
 	cfg.Port = vpnPort
 

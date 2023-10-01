@@ -17,12 +17,3 @@ type Firewall struct {
 type HelmParams struct {
 	Version string
 }
-
-type Status bool
-
-func (s *Status) WithDefault(t bool) Status {
-	if s == nil {
-		return Status(t)
-	}
-	return *s
-}

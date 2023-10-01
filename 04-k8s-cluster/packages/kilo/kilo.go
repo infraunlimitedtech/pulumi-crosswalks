@@ -22,7 +22,7 @@ type StartedKilo struct {
 }
 
 type Kilo struct {
-	Enabled     *config.Status
+	Enabled     bool
 	Name        string
 	Port        int
 	PrivateKey  string
@@ -464,8 +464,4 @@ cp secrets/* /var/lib/kilo/`),
 	}
 
 	return startedKilo, nil
-}
-
-func (k *Kilo) IsEnabled() config.Status {
-	return k.Enabled.WithDefault(true)
 }

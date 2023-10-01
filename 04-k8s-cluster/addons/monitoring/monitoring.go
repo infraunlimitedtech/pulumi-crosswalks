@@ -25,7 +25,6 @@ type VictoriaMetrics struct {
 }
 
 type VMAlert struct {
-	Enabled      *config.Status
 	Alertmanager *VMAlertAlertmanager
 	Helm         *config.HelmParams
 }
