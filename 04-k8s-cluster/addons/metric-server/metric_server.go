@@ -1,8 +1,8 @@
 package metrics_server
 
 import (
+	corev1 "github.com/pulumi/pulumi-kubernetes/sdk/v3/go/kubernetes/core/v1"
 	helmv3 "github.com/pulumi/pulumi-kubernetes/sdk/v3/go/kubernetes/helm/v3"
-		corev1 "github.com/pulumi/pulumi-kubernetes/sdk/v3/go/kubernetes/core/v1"
 
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
