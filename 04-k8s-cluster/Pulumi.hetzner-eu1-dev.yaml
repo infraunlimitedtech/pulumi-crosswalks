@@ -35,12 +35,27 @@ config:
               secure: v1:borGHRdeKho+3h8P:l2LtWtoC8T7FfcIB0T/tl6Odm4Y2aZQINebqaIPhtqhERn6QOC04AMl5cH541mdyE17p87SHcE6yM6tYDA==
         helm:
           version: 0.5.23
+    cloudflared:
+      enabled: true
+      helm:
+        version: 0.3.0
+      account: ecf0f955d887390392d0c89770f7b42a
+      tunnelID: d8ceaadc-848a-4992-a4c2-3c4318bc53e0
+      tunnelName: testtes
+      secret:
+        secure: v1:GfW6TzqivTTI0vPe:Qe4/5W2Wep0PENjDpE+5Dbo+kO2ReHwcfovt+4TvPq0Sd4RkbEdkIdBoS2Pmj7cfUMzdhmtPTXUgfQvi
+      ingress:
+        - hostname: gitlab-dev.infraunlimited.tech
+        - hostname: registry-gitlab-dev.infraunlimited.tech
+
     nginxIngress:
+      replicas: 1
+      clusterIp: 10.131.20.1
       helm:
         version: 0.16.2
       kubeapi:
         clusterIp: 10.131.1.1
-      replica: 1
+
   k8s-cluster:main:
     infraStack: spigell/managed-infrastructure/hetzner-eu1-dev
   k8s-cluster:rbac:
@@ -49,6 +64,11 @@ config:
   k8s-cluster:services:
     kiloVpn:
       enabled: false
+#    gitlab:
+#      enabled: true
+#      domain: infraunlimited.tech
+#      helm:
+#        version: 7.3.4
   k8s-cluster:spec:
     internalDomainZone: int.dev.k3s.eu1.infraunlimited.tech
   kubernetes:context: hetzner-eu1-dev-direct
